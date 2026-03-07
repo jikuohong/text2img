@@ -27,8 +27,8 @@
 | `PASSWORD` | `yourpassword` | 访问密码，多个密码用英文逗号分隔，留空则不验证 |
 | `HF_TOKEN` | `hf_xxx...` | HuggingFace API Token，不填则隐藏 HF 模型 |
 | `ENHANCE` | `false` | 设为 `false` 全局禁用提示词增强，默认开启 |
-| `IMAGE_HOST` | `https://image.kont.us.ci` | 图床地址，末尾不要加 `/` |
-| `GALLERY_URL` | `https://gallery.kont.us.ci` | Gallery Worker 地址，末尾不要加 `/` |
+| `IMAGE_HOST` | `https://your-image-host.com` | 图床地址，末尾不要加 `/` |
+| `GALLERY_URL` | `https://your-gallery.workers.dev` | Gallery Worker 地址，末尾不要加 `/` |
 
 > `IMAGE_HOST` 和 `GALLERY_URL` 二者同时配置时，图片生成后会先发给 Gallery Worker 做 AI 分析并上传图床；只配置 `IMAGE_HOST` 时仅上传图床不入图库。
 
@@ -163,5 +163,5 @@
 ## 快捷链接
 
 页面侧边栏「工具」区提供跳转：
-- **AI 图库** → `https://gallery.kont.us.ci`
-- **图床** → `https://image.kont.us.ci`
+- **AI 图库** → `https://your-gallery.workers.dev`
+- **图床** → `https://your-image-host.com`
