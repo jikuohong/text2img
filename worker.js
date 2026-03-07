@@ -254,11 +254,11 @@ html.dark .lerr{background:#7f1d1d;color:#fca5a5;border-color:#991b1b}
   <div style="margin-top:14px">
     <div class="sec-lbl">工具</div>
     <nav class="sb-nav">
-      <a class="ni" href="https://gallery.kont.us.ci" target="_blank">
+      <a class="ni" href="https://your-gallery.workers.dev" target="_blank">
         <span class="ni-ic"><i class="fa-solid fa-images"></i></span>AI 图库
         <span style="margin-left:auto;font-size:10px;opacity:.5"><i class="fa-solid fa-arrow-up-right-from-square"></i></span>
       </a>
-      <a class="ni" href="https://image.kont.us.ci" target="_blank">
+      <a class="ni" href="https://your-image-host.com" target="_blank">
         <span class="ni-ic"><i class="fa-solid fa-photo-film"></i></span>图床
         <span style="margin-left:auto;font-size:10px;opacity:.5"><i class="fa-solid fa-arrow-up-right-from-square"></i></span>
       </a>
