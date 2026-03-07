@@ -32,7 +32,7 @@ const HTML = `<!DOCTYPE html>
   --accent-h:#b35e26;
   --accent-bg:rgba(201,106,44,.09);
   --accent-ring:rgba(201,106,44,.22);
-  --sw:218px;
+  --sw:300px;
   --r:8px;
   --r-sm:5px;
   --sh:0 1px 2px rgba(0,0,0,.05),0 0 0 1px rgba(0,0,0,.04);
@@ -65,12 +65,19 @@ body{font-family:var(--f);background:var(--bg);color:var(--text);min-height:100v
 #sb{
   width:var(--sw);min-height:100vh;background:var(--surface);
   border-right:1px solid var(--border);display:flex;flex-direction:column;
-  padding:20px 0;position:fixed;inset:0 auto 0 0;z-index:40;
+  padding:0;position:fixed;inset:0 auto 0 0;z-index:40;
   transition:background var(--t),border-color var(--t);
+  overflow:hidden;
 }
+.sb-head{padding:20px 16px 0;flex-shrink:0}
+.sb-scroll{flex:1;overflow-y:auto;padding:0 0 8px;display:flex;flex-direction:column}
+.sb-scroll::-webkit-scrollbar{width:4px}
+.sb-scroll::-webkit-scrollbar-track{background:transparent}
+.sb-scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.sb-foot{flex-shrink:0;padding:10px 12px 16px;border-top:1px solid var(--border)}
 .sb-logo{
   display:flex;align-items:center;gap:9px;
-  padding:0 16px 18px;border-bottom:1px solid var(--border);margin-bottom:10px;
+  padding:0 0 16px;border-bottom:1px solid var(--border);margin-bottom:10px;
 }
 .sb-logo-ic{
   width:30px;height:30px;border-radius:50%;background:var(--accent);
@@ -108,14 +115,14 @@ body{font-family:var(--f);background:var(--bg);color:var(--text);min-height:100v
 /* ─── MAIN ─── */
 #main{margin-left:var(--sw);flex:1;display:flex;flex-direction:column;min-height:100vh}
 .topbar{
-  height:52px;background:var(--surface);border-bottom:1px solid var(--border);
-  display:flex;align-items:center;padding:0 22px;gap:10px;
+  height:54px;background:var(--surface);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 26px;gap:10px;
   position:sticky;top:0;z-index:30;
 }
 .topbar-title{font-family:var(--fh);font-size:15px;font-weight:600;flex:1;color:var(--text)}
 .sdot{width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 2px rgba(34,197,94,.2);flex-shrink:0}
 .slbl{font-size:12px;color:var(--muted)}
-.pcont{padding:22px 22px 40px;flex:1}
+.pcont{padding:24px 28px 52px;flex:1}
 
 /* ─── CARDS ─── */
 .card{
@@ -123,17 +130,17 @@ body{font-family:var(--f);background:var(--bg);color:var(--text);min-height:100v
   border-radius:var(--r);box-shadow:var(--sh);
   transition:background var(--t),border-color var(--t);
 }
-.ch{padding:14px 18px 0;display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.ch{padding:16px 20px 0;display:flex;align-items:center;gap:8px;margin-bottom:14px}
 .ch-ic{
-  width:26px;height:26px;border-radius:var(--r-sm);background:var(--accent-bg);
-  display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--accent);
+  width:28px;height:28px;border-radius:var(--r-sm);background:var(--accent-bg);
+  display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--accent);
 }
-.ct{font-size:13.5px;font-weight:600;flex:1;color:var(--text)}
-.cb{padding:0 18px 18px}
+.ct{font-size:14px;font-weight:600;flex:1;color:var(--text)}
+.cb{padding:0 20px 20px}
 
 /* ─── LAYOUT ─── */
-.cols{display:grid;grid-template-columns:390px 1fr;gap:18px;align-items:start}
-@media(max-width:900px){.cols{grid-template-columns:1fr}#sb{display:none}#main{margin-left:0}}
+.cols{display:block}
+@media(max-width:1000px){#sb{display:none}#main{margin-left:0}}
 
 /* ─── FORM ─── */
 label{
@@ -142,16 +149,16 @@ label{
 }
 input[type=text],input[type=password],input[type=number],textarea,select{
   width:100%;background:var(--surface2);border:1px solid var(--border);
-  border-radius:var(--r-sm);padding:8px 11px;font-size:13.5px;
+  border-radius:var(--r-sm);padding:9px 12px;font-size:13.5px;
   color:var(--text);font-family:var(--f);transition:border-color var(--t),box-shadow var(--t);outline:none;
 }
 input::placeholder,textarea::placeholder{color:var(--muted2)}
 input:focus,textarea:focus,select:focus{
   border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-ring);
 }
-textarea{resize:vertical;min-height:72px;line-height:1.5}
+textarea{resize:vertical;min-height:82px;line-height:1.55}
 select{appearance:none;cursor:pointer}
-.fr{margin-bottom:13px}
+.fr{margin-bottom:15px}
 .lr{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
 .lr label{margin-bottom:0}
 
@@ -189,8 +196,15 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.15)}
 .bfw{width:100%}
 .btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
 
-/* ─── SIZE PRESETS ─── */
-.size-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:5px}
+/* ─── SIDEBAR SETTINGS ─── */
+.sb-section{padding:12px 14px;border-top:1px solid var(--border)}
+.sb-section-lbl{
+  font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;
+  color:var(--muted2);margin-bottom:8px;
+}
+.sb-gen-btn{padding:12px 14px 0}
+/* size grid 2 cols in sidebar */
+.size-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:5px;margin-top:5px}
 .sz{
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   padding:6px 3px;border-radius:var(--r-sm);border:1px solid var(--border);
@@ -419,42 +433,181 @@ html.dark .lerr{background:rgba(154,52,18,.2);color:#fca882;border-color:rgba(15
 
 <!-- SIDEBAR -->
 <aside id="sb">
-  <div class="sb-logo">
-    <div class="sb-logo-ic"><i class="fa-solid fa-wand-magic-sparkles" style="font-size:11px"></i></div>
-    <span class="sb-logo-tx">AI 文生图</span>
-  </div>
-  <div class="sec-lbl">功能</div>
-  <nav class="sb-nav">
-    <button class="ni active">
-      <span class="ni-ic"><i class="fa-solid fa-wand-magic-sparkles"></i></span>文生图
-    </button>
-    <button class="ni" id="histNavBtn">
-      <span class="ni-ic"><i class="fa-solid fa-clock-rotate-left"></i></span>历史记录
-      <span id="histCount" style="margin-left:auto;font-size:10px;background:var(--accent-bg);color:var(--accent);padding:1px 7px;border-radius:10px;border:1px solid var(--accent-ring);display:none">0</span>
-    </button>
-    <button class="ni" style="opacity:.38;cursor:not-allowed" disabled>
-      <span class="ni-ic"><i class="fa-solid fa-image"></i></span>图生图
-      <span style="margin-left:auto;font-size:10px;background:var(--surface2);color:var(--muted);padding:1px 7px;border-radius:10px;border:1px solid var(--border)">Soon</span>
-    </button>
-  </nav>
-  <div style="margin-top:12px">
-    <div class="sec-lbl">工具</div>
+
+  <!-- Fixed header: logo + nav -->
+  <div class="sb-head">
+    <div class="sb-logo">
+      <div class="sb-logo-ic"><i class="fa-solid fa-wand-magic-sparkles" style="font-size:11px"></i></div>
+      <span class="sb-logo-tx">AI 文生图</span>
+    </div>
+    <div class="sec-lbl">功能</div>
     <nav class="sb-nav">
-      <a class="ni" href="https://your-gallery.workers.dev" target="_blank">
-        <span class="ni-ic"><i class="fa-solid fa-images"></i></span>AI 图库
-        <span style="margin-left:auto;font-size:9px;opacity:.45"><i class="fa-solid fa-arrow-up-right-from-square"></i></span>
-      </a>
-      <a class="ni" href="https://your-image-host.com" target="_blank">
-        <span class="ni-ic"><i class="fa-solid fa-photo-film"></i></span>图床
-        <span style="margin-left:auto;font-size:9px;opacity:.45"><i class="fa-solid fa-arrow-up-right-from-square"></i></span>
-      </a>
+      <button class="ni active">
+        <span class="ni-ic"><i class="fa-solid fa-wand-magic-sparkles"></i></span>文生图
+      </button>
+      <button class="ni" id="histNavBtn">
+        <span class="ni-ic"><i class="fa-solid fa-clock-rotate-left"></i></span>历史记录
+        <span id="histCount" style="margin-left:auto;font-size:10px;background:var(--accent-bg);color:var(--accent);padding:1px 7px;border-radius:10px;border:1px solid var(--accent-ring);display:none">0</span>
+      </button>
+      <button class="ni" style="opacity:.38;cursor:not-allowed" disabled>
+        <span class="ni-ic"><i class="fa-solid fa-image"></i></span>图生图
+        <span style="margin-left:auto;font-size:10px;background:var(--surface2);color:var(--muted);padding:1px 7px;border-radius:10px;border:1px solid var(--border)">Soon</span>
+      </button>
     </nav>
   </div>
-  <div style="flex:1"></div>
-  <div class="sb-ft">
-    <button class="ib" id="themeToggle" title="切换主题"><i class="fa-solid fa-moon" id="themeIcon"></i></button>
-    <button class="ib" id="logoutBtn" title="退出登录"><i class="fa-solid fa-right-from-bracket"></i></button>
+
+  <!-- Scrollable settings area -->
+  <div class="sb-scroll">
+
+    <!-- Prompt -->
+    <div class="sb-section">
+      <div class="sb-section-lbl">提示词</div>
+      <div class="fr">
+        <label>正向提示词</label>
+        <textarea id="prompt" rows="3" placeholder="描述想生成的图像内容…"></textarea>
+      </div>
+      <div class="fr">
+        <label>反向提示词</label>
+        <textarea id="neg" rows="2" placeholder="描述要排除的内容…"></textarea>
+      </div>
+    </div>
+
+    <!-- Model + Enhance -->
+    <div class="sb-section">
+      <div class="sb-section-lbl">模型设置</div>
+      <div class="fr">
+        <label>文生图模型</label>
+        <div class="selwrap">
+          <select id="model"><option value="loading" disabled selected>加载中…</option></select>
+        </div>
+        <div id="pvinfo" style="margin-top:7px;display:none;align-items:center;gap:6px">
+          <span id="pvbadge" class="pbadge"></span>
+          <span id="pvnote" style="font-size:11px;color:var(--muted)"></span>
+        </div>
+      </div>
+      <div class="fr" style="margin-bottom:0">
+        <label>提示词增强</label>
+        <div class="toggle-row" id="enhToggle">
+          <div class="tog-info">
+            <span class="tog-title">✨ AI 自动增强 &amp; 翻译</span>
+            <span class="tog-sub">Llama 扩写，中文转英文</span>
+          </div>
+          <div class="tog-switch"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Size & Advanced (collapsible) -->
+    <div class="sb-section">
+      <div class="sb-section-lbl ctog" id="advToggle" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-bottom:0;padding-bottom:8px">
+        尺寸 &amp; 高级选项
+        <i class="fa-solid fa-chevron-down cic" style="font-size:9px"></i>
+      </div>
+      <div class="coll" id="advBody">
+        <div class="fr">
+          <label>快速尺寸</label>
+          <div class="size-grid" id="sizeGrid">
+            <div class="sz active" data-w="1024" data-h="1024">
+              <span class="sz-icon">⬛</span>
+              <span class="sz-label">正方形</span>
+              <span class="sz-dim">1024×1024</span>
+            </div>
+            <div class="sz" data-w="1920" data-h="1080">
+              <span class="sz-icon">🖥️</span>
+              <span class="sz-label">横屏 16:9</span>
+              <span class="sz-dim">1920×1080</span>
+            </div>
+            <div class="sz" data-w="1080" data-h="1920">
+              <span class="sz-icon">📱</span>
+              <span class="sz-label">竖屏 9:16</span>
+              <span class="sz-dim">1080×1920</span>
+            </div>
+            <div class="sz" data-w="1200" data-h="630">
+              <span class="sz-icon">🌐</span>
+              <span class="sz-label">封面图</span>
+              <span class="sz-dim">1200×630</span>
+            </div>
+            <div class="sz" data-w="1080" data-h="1080">
+              <span class="sz-icon">📷</span>
+              <span class="sz-label">Instagram</span>
+              <span class="sz-dim">1080×1080</span>
+            </div>
+            <div class="sz" data-w="1500" data-h="500">
+              <span class="sz-icon">🐦</span>
+              <span class="sz-label">Twitter 封面</span>
+              <span class="sz-dim">1500×500</span>
+            </div>
+            <div class="sz" data-w="2560" data-h="1440">
+              <span class="sz-icon">🖼️</span>
+              <span class="sz-label">壁纸 2K</span>
+              <span class="sz-dim">2560×1440</span>
+            </div>
+            <div class="sz" data-w="512" data-h="512">
+              <span class="sz-icon">⚡</span>
+              <span class="sz-label">极速小图</span>
+              <span class="sz-dim">512×512</span>
+            </div>
+          </div>
+        </div>
+        <hr class="dvd">
+        <div class="fr">
+          <div class="lr"><label>宽度</label><span class="sv" id="wv">1024px</span></div>
+          <input type="range" id="width" min="256" max="2048" step="64" value="1024">
+        </div>
+        <div class="fr">
+          <div class="lr"><label>高度</label><span class="sv" id="hv">1024px</span></div>
+          <input type="range" id="height" min="256" max="2048" step="64" value="1024">
+        </div>
+        <div class="fr">
+          <div class="lr"><label>迭代步数</label><span class="sv" id="stv">20</span></div>
+          <input type="range" id="steps" min="1" max="50" step="1" value="20">
+        </div>
+        <div class="fr">
+          <div class="lr"><label>引导系数</label><span class="sv" id="guv">7.50</span></div>
+          <input type="range" id="guidance" min="0" max="30" step="0.5" value="7.5">
+        </div>
+        <div class="fr" style="margin-bottom:0">
+          <div class="lr">
+            <label>随机种子</label>
+            <button class="btn bg bsm" id="randSeed"><i class="fa-solid fa-shuffle"></i> 随机</button>
+          </div>
+          <input type="number" id="seed" placeholder="留空则随机">
+        </div>
+      </div>
+    </div>
+
+    <!-- spacer pushes links to bottom -->
+    <div style="flex:1"></div>
+
+    <!-- Links at very bottom of scroll area -->
+    <div class="sb-section" style="border-top:1px solid var(--border);margin-top:8px">
+      <div class="sb-section-lbl">工具链接</div>
+      <nav class="sb-nav" style="padding:0">
+        <a class="ni" href="https://your-gallery.workers.dev" target="_blank">
+          <span class="ni-ic"><i class="fa-solid fa-images"></i></span>AI 图库
+          <span style="margin-left:auto;font-size:9px;opacity:.45"><i class="fa-solid fa-arrow-up-right-from-square"></i></span>
+        </a>
+        <a class="ni" href="https://your-image-host.com" target="_blank">
+          <span class="ni-ic"><i class="fa-solid fa-photo-film"></i></span>图床
+          <span style="margin-left:auto;font-size:9px;opacity:.45"><i class="fa-solid fa-arrow-up-right-from-square"></i></span>
+        </a>
+      </nav>
+    </div>
+
   </div>
+
+  <!-- Fixed footer: generate + theme/logout -->
+  <div class="sb-foot">
+    <button class="btn bp bfw" id="genBtn" style="height:42px;font-size:13.5px;border-radius:var(--r);margin-bottom:10px">
+      <i class="fa-solid fa-wand-magic-sparkles"></i> 生成图像
+    </button>
+    <div style="display:flex;gap:6px;align-items:center">
+      <button class="btn bg bsm" id="randomBtn" style="flex:1;justify-content:center"><i class="fa-solid fa-dice"></i> 随机提示词</button>
+      <button class="ib" id="themeToggle" title="切换主题"><i class="fa-solid fa-moon" id="themeIcon"></i></button>
+      <button class="ib" id="logoutBtn" title="退出登录"><i class="fa-solid fa-right-from-bracket"></i></button>
+    </div>
+  </div>
+
 </aside>
 
 <!-- MAIN -->
@@ -470,138 +623,8 @@ html.dark .lerr{background:rgba(154,52,18,.2);color:#fca882;border-color:rgba(15
   <div class="pcont">
     <div class="cols">
 
-      <!-- LEFT PANEL -->
-      <div style="display:flex;flex-direction:column;gap:13px">
-
-        <!-- Basic -->
-        <div class="card">
-          <div class="ch">
-            <div class="ch-ic"><i class="fa-solid fa-sliders"></i></div>
-            <span class="ct">基本设置</span>
-            <button class="btn bg bsm" id="randomBtn"><i class="fa-solid fa-dice"></i> 随机</button>
-          </div>
-          <div class="cb">
-            <div class="fr">
-              <label>正向提示词</label>
-              <textarea id="prompt" rows="3" placeholder="描述想生成的图像内容… 支持中文，开启增强自动翻译优化"></textarea>
-            </div>
-            <div class="fr">
-              <label>反向提示词</label>
-              <textarea id="neg" rows="2" placeholder="描述要排除的内容…"></textarea>
-            </div>
-            <div class="fr">
-              <label>文生图模型</label>
-              <div class="selwrap">
-                <select id="model"><option value="loading" disabled selected>加载中…</option></select>
-              </div>
-              <div id="pvinfo" style="margin-top:7px;display:none;align-items:center;gap:6px">
-                <span id="pvbadge" class="pbadge"></span>
-                <span id="pvnote" style="font-size:11px;color:var(--muted)"></span>
-              </div>
-            </div>
-            <!-- Enhance toggle -->
-            <div class="fr" style="margin-bottom:0">
-              <label>提示词增强</label>
-              <div class="toggle-row" id="enhToggle">
-                <div class="tog-info">
-                  <span class="tog-title">✨ AI 自动增强 &amp; 翻译</span>
-                  <span class="tog-sub">用 Llama 3.1 扩写提示词，中文自动转英文</span>
-                </div>
-                <div class="tog-switch"></div>
-              </div>
-              <div id="enhTag"><i class="fa-solid fa-sparkles"></i> 提示词已增强</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Size & Advanced -->
-        <div class="card">
-          <div class="ch ctog" id="advToggle">
-            <div class="ch-ic"><i class="fa-solid fa-gear"></i></div>
-            <span class="ct">尺寸 &amp; 高级选项</span>
-            <i class="fa-solid fa-chevron-down cic"></i>
-          </div>
-          <div class="cb coll" id="advBody">
-            <!-- Size presets -->
-            <div class="fr">
-              <label>快速尺寸</label>
-              <div class="size-grid" id="sizeGrid">
-                <div class="sz active" data-w="1024" data-h="1024">
-                  <span class="sz-icon">⬛</span>
-                  <span class="sz-label">正方形</span>
-                  <span class="sz-dim">1024×1024</span>
-                </div>
-                <div class="sz" data-w="1920" data-h="1080">
-                  <span class="sz-icon">🖥️</span>
-                  <span class="sz-label">横屏 16:9</span>
-                  <span class="sz-dim">1920×1080</span>
-                </div>
-                <div class="sz" data-w="1080" data-h="1920">
-                  <span class="sz-icon">📱</span>
-                  <span class="sz-label">竖屏 9:16</span>
-                  <span class="sz-dim">1080×1920</span>
-                </div>
-                <div class="sz" data-w="1200" data-h="630">
-                  <span class="sz-icon">🌐</span>
-                  <span class="sz-label">封面图</span>
-                  <span class="sz-dim">1200×630</span>
-                </div>
-                <div class="sz" data-w="1080" data-h="1080">
-                  <span class="sz-icon">📷</span>
-                  <span class="sz-label">Instagram</span>
-                  <span class="sz-dim">1080×1080</span>
-                </div>
-                <div class="sz" data-w="1500" data-h="500">
-                  <span class="sz-icon">🐦</span>
-                  <span class="sz-label">Twitter 封面</span>
-                  <span class="sz-dim">1500×500</span>
-                </div>
-                <div class="sz" data-w="2560" data-h="1440">
-                  <span class="sz-icon">🖼️</span>
-                  <span class="sz-label">壁纸 2K</span>
-                  <span class="sz-dim">2560×1440</span>
-                </div>
-                <div class="sz" data-w="512" data-h="512">
-                  <span class="sz-icon">⚡</span>
-                  <span class="sz-label">极速小图</span>
-                  <span class="sz-dim">512×512</span>
-                </div>
-              </div>
-            </div>
-            <hr class="dvd">
-            <div class="fr">
-              <div class="lr"><label>宽度</label><span class="sv" id="wv">1024px</span></div>
-              <input type="range" id="width" min="256" max="2048" step="64" value="1024">
-            </div>
-            <div class="fr">
-              <div class="lr"><label>高度</label><span class="sv" id="hv">1024px</span></div>
-              <input type="range" id="height" min="256" max="2048" step="64" value="1024">
-            </div>
-            <div class="fr">
-              <div class="lr"><label>迭代步数</label><span class="sv" id="stv">20</span></div>
-              <input type="range" id="steps" min="1" max="50" step="1" value="20">
-            </div>
-            <div class="fr">
-              <div class="lr"><label>引导系数</label><span class="sv" id="guv">7.50</span></div>
-              <input type="range" id="guidance" min="0" max="30" step="0.5" value="7.5">
-            </div>
-            <div class="fr" style="margin-bottom:0">
-              <div class="lr">
-                <label>随机种子</label>
-                <button class="btn bg bsm" id="randSeed"><i class="fa-solid fa-shuffle"></i> 随机</button>
-              </div>
-              <input type="number" id="seed" placeholder="留空则随机">
-            </div>
-          </div>
-        </div>
-
-        <button class="btn bp bfw" id="genBtn" style="height:44px;font-size:14px;border-radius:var(--r)">
-          <i class="fa-solid fa-wand-magic-sparkles"></i> 生成图像
-        </button>
-      </div>
-
-      <!-- RIGHT PANEL -->
-      <div style="display:flex;flex-direction:column;gap:13px">
+      <!-- RESULT PANEL -->
+      <div style="display:flex;flex-direction:column;gap:16px">
 
         <!-- Result -->
         <div class="card">
@@ -696,7 +719,7 @@ html.dark .lerr{background:rgba(154,52,18,.2);color:#fca882;border-color:rgba(15
 <script>
 (function(){
 'use strict';
-var models=[],prompts=[],curParams=null,enhOn=false,genTimer=null;
+var models=[],curParams=null,enhOn=true,genTimer=null;
 
 // ── Theme ──────────────────────────────────────────────────────────────────
 var html=document.documentElement;
@@ -759,6 +782,8 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')lb.classList
 
 // ── Enhance toggle ─────────────────────────────────────────────────────────
 var enhToggle=document.getElementById('enhToggle');
+// 默认开启增强
+enhToggle.classList.add('on');
 enhToggle.addEventListener('click',function(){
   enhOn=!enhOn;
   enhToggle.classList.toggle('on',enhOn);
@@ -846,20 +871,27 @@ async function loadModels(){
     sel.addEventListener('change',function(){updatePvBadge(sel.value);});
   }catch(e){toast('加载模型失败','err');}
 }
-async function loadPrompts(){
-  try{
-    var r=await fetch('/api/prompts');prompts=await r.json();
-    if(prompts.length){
-      var el=document.getElementById('prompt');
-      if(!el.value)el.value=prompts[Math.floor(Math.random()*prompts.length)];
-    }
-  }catch(e){prompts=[];}
-}
-loadModels();loadPrompts();
+loadModels();
 
-document.getElementById('randomBtn').addEventListener('click',function(){
-  if(!prompts.length){toast('提示词列表未加载','err');return;}
-  document.getElementById('prompt').value=prompts[Math.floor(Math.random()*prompts.length)];
+document.getElementById('randomBtn').addEventListener('click',async function(){
+  var btn=this;
+  btn.disabled=true;
+  var orig=btn.innerHTML;
+  btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> 生成中…';
+  try{
+    var r=await fetch('/api/prompts');
+    var data=await r.json();
+    if(data.prompt){
+      document.getElementById('prompt').value=data.prompt;
+    }else{
+      toast('生成失败，请重试','err');
+    }
+  }catch(e){
+    toast('网络错误','err');
+  }finally{
+    btn.disabled=false;
+    btn.innerHTML=orig;
+  }
 });
 
 // ── History (IndexedDB) ────────────────────────────────────────────────────
@@ -935,11 +967,45 @@ renderHistory();
 document.getElementById('genBtn').addEventListener('click',generate);
 document.getElementById('reuseBtn').addEventListener('click',function(){if(curParams)generate(true);});
 
+// 自动降级模型链：主模型失败后按顺序尝试
+var FALLBACK_CHAIN=['pol-flux','pol-turbo','pol-flux-realism'];
+
+// 发起单次请求（带超时），成功返回 {res, blob, b64}，失败抛出错误
+async function tryFetch(params, timeoutMs){
+  timeoutMs = timeoutMs || 50000;
+  var controller = new AbortController();
+  var timer = setTimeout(function(){ controller.abort(); }, timeoutMs);
+  try{
+    var res=await fetch('/',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'image/*'},
+      body:JSON.stringify(params),
+      signal: controller.signal,
+    });
+    clearTimeout(timer);
+    if(!res.ok){
+      var ct=res.headers.get('content-type')||'';
+      var errData=ct.includes('json')?await res.json():{error:'生成失败'};
+      if(errData.loading)throw Object.assign(new Error(errData.error||'模型加载中'),{loading:true});
+      throw new Error(errData.error||'生成失败 ('+res.status+')');
+    }
+    var blob=await res.blob();
+    var b64=await blobToB64(blob);
+    return {res:res,blob:blob,b64:b64};
+  }catch(e){
+    clearTimeout(timer);
+    if(e.name==='AbortError') throw new Error('请求超时，切换备用模型');
+    throw e;
+  }
+}
+
 async function generate(reuse){
   var overlay=document.getElementById('ldov');
   var ph=document.getElementById('imgPH');
   var area=document.getElementById('imgArea');
   var enhTagEl=document.getElementById('enhTag');
+  var ldText=overlay.querySelector('p');
+  var ldSub=overlay.querySelector('.sub');
 
   aiImg.style.display='none';ph.style.display='';
   area.classList.remove('has-img');overlay.classList.add('show');
@@ -951,6 +1017,8 @@ async function generate(reuse){
   ['cpBtn','dlBtn','reuseBtn'].forEach(function(id){document.getElementById(id).classList.add('hidden');});
   document.getElementById('retryBadge').classList.add('hidden');
   document.getElementById('genBtn').disabled=true;
+  if(ldText)ldText.textContent='生成中，请稍候…';
+  if(ldSub)ldSub.textContent='这可能需要几秒到几十秒';
 
   var t0=performance.now();
   var timerEl=document.getElementById('ldTimer');
@@ -959,7 +1027,7 @@ async function generate(reuse){
 
   var params=reuse&&curParams?Object.assign({},curParams,{password:sessionStorage.getItem('apw')||''}):{
     password:sessionStorage.getItem('apw')||'',
-    prompt:document.getElementById('prompt').value||prompts[Math.floor(Math.random()*prompts.length)]||'a beautiful landscape',
+    prompt:document.getElementById('prompt').value||'a beautiful landscape',
     negative_prompt:document.getElementById('neg').value||'',
     model:document.getElementById('model').value,
     width:parseInt(document.getElementById('width').value)||1024,
@@ -971,75 +1039,118 @@ async function generate(reuse){
   };
   if(!reuse)curParams=Object.assign({},params);
 
-  try{
-    var res=await fetch('/',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Accept':'image/*'},
-      body:JSON.stringify(params),
-    });
+  // 构建完整尝试队列：主模型 + 降级链（排除重复）
+  var primaryModel=params.model;
+  var queue=[primaryModel].concat(
+    FALLBACK_CHAIN.filter(function(id){return id!==primaryModel;})
+  );
 
-    clearInterval(genTimer);
-    var elapsed=((performance.now()-t0)/1000).toFixed(2);
+  var result=null;
+  var usedFallback=false;
+  var lastErr=null;
 
-    if(!res.ok){
-      var ct=res.headers.get('content-type')||'';
-      var errData=ct.includes('json')?await res.json():{error:'生成失败'};
-      if(errData.loading){toast('模型加载中，请 30 秒后重试 ⏳','warn');throw new Error(errData.error);}
-      throw new Error(errData.error||'生成失败');
+  for(var qi=0;qi<queue.length;qi++){
+    var tryModel=queue[qi];
+    var tryParams=Object.assign({},params,{model:tryModel});
+
+    if(qi>0){
+      // 降级尝试，更新 overlay 提示
+      var fallbackName=getMdlName(tryModel)||tryModel;
+      if(ldText)ldText.textContent='正在切换备用模型…';
+      if(ldSub)ldSub.textContent='备用：'+fallbackName;
+      toast('主模型失败，切换备用：'+fallbackName,'warn');
+      usedFallback=true;
     }
 
-    var blob=await res.blob();
-    var b64=await blobToB64(blob);
-
-    aiImg.src=b64;
-    aiImg.onload=function(){
-      overlay.classList.remove('show');
-      aiImg.style.display='block';ph.style.display='none';
-      area.classList.add('has-img');
-
-      var wasEnhanced=res.headers.get('x-enhanced')==='true'||enhOn;
-      if(wasEnhanced)enhTagEl.style.display='flex';
-
-      document.getElementById('genTime').textContent=elapsed+' 秒';
-      document.getElementById('usedMdl').textContent=getMdlName(params.model);
-      document.getElementById('imgMeta').classList.remove('hidden');
-
-      renderParams(params,null,null);
-      ['cpBtn','dlBtn','reuseBtn'].forEach(function(id){document.getElementById(id).classList.remove('hidden');});
-      document.getElementById('genBtn').disabled=false;
-
-      var dlStrip=document.getElementById('dlStrip');
-      var dlLink=document.getElementById('dlLink');
-      var dlThumb=document.getElementById('dlThumb');
-      var dlName=document.getElementById('dlName');
-      var dlMeta=document.getElementById('dlMeta');
-      var mdlName=getMdlName(params.model);
-      var fname='ai-'+mdlName.replace(/[^a-zA-Z0-9]/g,'-')+'-'+Date.now()+'.png';
-      dlThumb.src=b64;dlLink.href=b64;dlLink.download=fname;
-      dlName.textContent=fname;
-      dlMeta.textContent=params.width+'×'+params.height+' · '+mdlName+' · '+elapsed+'s';
-      dlStrip.classList.add('show');
-
-      var imageUrl=res.headers.get('x-image-url');
-      var hostStrip=document.getElementById('hostStrip');
-      var hostUrlInput=document.getElementById('hostUrl');
-      var openHostUrl=document.getElementById('openHostUrl');
-      if(imageUrl){
-        hostUrlInput.value=imageUrl;openHostUrl.href=imageUrl;
-        hostStrip.style.display='flex';
-        toast('生成成功，已上传图床 🎨','ok');
-      }else{
-        hostStrip.style.display='none';
-        toast('生成成功 🎨','ok');
+    try{
+      result=await tryFetch(tryParams);
+      // 成功，把实际用的模型写回 params
+      params=tryParams;
+      if(!reuse)curParams=Object.assign({},params);
+      break;
+    }catch(err){
+      lastErr=err;
+      clearInterval(genTimer);
+      // 如果是模型冷启动，不继续降级，直接提示
+      if(err.loading){
+        overlay.classList.remove('show');ph.style.display='';
+        document.getElementById('genBtn').disabled=false;
+        toast('模型加载中，请 30 秒后重试 ⏳','warn');
+        return;
       }
-      histAdd({img:b64,prompt:params.prompt,params:params,ts:Date.now()}).then(renderHistory).catch(function(){});
-    };
-  }catch(err){
-    clearInterval(genTimer);
+      // 还有备用模型则重启计时器继续
+      if(qi<queue.length-1){
+        t0=performance.now();
+        genTimer=setInterval(function(){timerEl.textContent=((performance.now()-t0)/1000).toFixed(1)+'s';},200);
+      }
+    }
+  }
+
+  clearInterval(genTimer);
+
+  if(!result){
     overlay.classList.remove('show');ph.style.display='';
     document.getElementById('genBtn').disabled=false;
-    toast(err.message||'生成失败','err');
+    toast((lastErr&&lastErr.message)||'所有模型均生成失败','err');
+    return;
   }
+
+  var elapsed=((performance.now()-t0)/1000).toFixed(2);
+  var res=result.res, b64=result.b64;
+
+  aiImg.src=b64;
+  aiImg.onload=function(){
+    overlay.classList.remove('show');
+    aiImg.style.display='block';ph.style.display='none';
+    area.classList.add('has-img');
+
+    var wasEnhanced=res.headers.get('x-enhanced')==='true'||enhOn;
+    if(wasEnhanced)enhTagEl.style.display='flex';
+
+    document.getElementById('genTime').textContent=elapsed+' 秒';
+    document.getElementById('usedMdl').textContent=getMdlName(params.model);
+    document.getElementById('imgMeta').classList.remove('hidden');
+
+    // 显示降级徽标
+    if(usedFallback){
+      var rb=document.getElementById('retryBadge');
+      rb.innerHTML='<i class="fa-solid fa-rotate-right"></i> 已切换备用：'+getMdlName(params.model);
+      rb.classList.remove('hidden');
+    }
+
+    renderParams(params,null,null);
+    ['cpBtn','dlBtn','reuseBtn'].forEach(function(id){document.getElementById(id).classList.remove('hidden');});
+    document.getElementById('genBtn').disabled=false;
+    // 恢复 overlay 文案
+    if(ldText)ldText.textContent='生成中，请稍候…';
+    if(ldSub)ldSub.textContent='这可能需要几秒到几十秒';
+
+    var dlStrip=document.getElementById('dlStrip');
+    var dlLink=document.getElementById('dlLink');
+    var dlThumb=document.getElementById('dlThumb');
+    var dlName=document.getElementById('dlName');
+    var dlMeta=document.getElementById('dlMeta');
+    var mdlName=getMdlName(params.model);
+    var fname='ai-'+mdlName.replace(/[^a-zA-Z0-9]/g,'-')+'-'+Date.now()+'.png';
+    dlThumb.src=b64;dlLink.href=b64;dlLink.download=fname;
+    dlName.textContent=fname;
+    dlMeta.textContent=params.width+'×'+params.height+' · '+mdlName+' · '+elapsed+'s';
+    dlStrip.classList.add('show');
+
+    var imageUrl=res.headers.get('x-image-url');
+    var hostStrip=document.getElementById('hostStrip');
+    var hostUrlInput=document.getElementById('hostUrl');
+    var openHostUrl=document.getElementById('openHostUrl');
+    if(imageUrl){
+      hostUrlInput.value=imageUrl;openHostUrl.href=imageUrl;
+      hostStrip.style.display='flex';
+      toast('生成成功，已上传图床 🎨','ok');
+    }else{
+      hostStrip.style.display='none';
+      toast(usedFallback?'备用模型生成成功 🎨':'生成成功 🎨','ok');
+    }
+    histAdd({img:b64,prompt:params.prompt,params:params,ts:Date.now()}).then(renderHistory).catch(function(){});
+  };
 }
 
 // ── Copy host URL ──────────────────────────────────────────────────────────
@@ -1126,18 +1237,7 @@ const HF_MODELS = [
 
 const ALL_MODELS = [...CF_MODELS, ...POLLINATIONS_MODELS, ...HF_MODELS];
 
-const RANDOM_PROMPTS = [
-  'cyberpunk cat samurai graphic art, blood splattered, beautiful colors',
-  '1girl, solo, outdoors, camping, night, mountains, stars, moon, tent, cheerful, happy, forest, river',
-  'masterpiece, best quality, 1girl, long blonde hair, blue eyes, forest, flowers, white butterfly, looking at viewer',
-  'frost_glass, masterpiece, cute girl wearing red Christmas dress, snowy forest, moonlight, aurora, sharp focus',
-  '1girl, hatsune miku, power elements, microphone, vibrant blue color palette, dreamlike atmosphere',
-  'cyberpunk cat, neon lights, ultra detailed, dark, rain, at night, cinematic, dystopic',
-  'Cyberpunk catgirl with purple hair, leather outfit, glowing blue eyes, cyberpunk alley background',
-  'a wide aerial view of a floating elven city in the sky, crystal towers, surrounded by clouds and golden light',
-  'masterpiece, 1girl, very long hair, blonde, sunset, cumulonimbus cloud, old tree, sitting in tree',
-  'beautiful girl, sniper rifle, dark braided hair, armor, alpine, night, freckles, depth of field',
-];
+// 随机提示词由 AI 实时生成，见 /api/prompts 路由
 
 // ── Prompt Enhancement ────────────────────────────────────────────────────────
 async function enhancePrompt(originalPrompt, env) {
@@ -1193,9 +1293,23 @@ export default {
       }
 
       if (path === '/api/prompts') {
-        return new Response(JSON.stringify(RANDOM_PROMPTS), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
+        try {
+          const resp = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
+            messages: [
+              { role: 'system', content: '你是一个创意词语生成器。每次输出一组2~5个随机词语，用于图像生成的灵感，词语之间用逗号分隔。可以是中文或英文，主题随机，天马行空，风格各异。只输出词语本身，不要任何解释或标点以外的内容。' },
+              { role: 'user', content: '生成一组随机词语' },
+            ],
+            max_tokens: 60,
+          });
+          const text = (resp?.response || '').trim();
+          return new Response(JSON.stringify({ prompt: text }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        } catch(e) {
+          return new Response(JSON.stringify({ prompt: '' }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
       }
 
       if (request.method === 'POST') {
