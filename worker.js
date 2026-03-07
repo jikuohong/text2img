@@ -14,202 +14,380 @@ const HTML = `<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AI 文生图 · Cloudflare Workers</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Sora:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#f0f2f5;--surface:#fff;--border:#e4e8ef;--text:#1a1d27;--muted:#7a8197;
-  --a1:#1d9bf0;--a2:#0bc5a4;
-  --grad:linear-gradient(135deg,#1d9bf0,#0bc5a4);
-  --gsoft:linear-gradient(135deg,rgba(29,155,240,.1),rgba(11,197,164,.1));
-  --sw:220px;--r:12px;
-  --sh:0 2px 12px rgba(0,0,0,.06);--shl:0 8px 32px rgba(0,0,0,.1);
-  --f:'DM Sans',-apple-system,sans-serif;--fh:'Sora',sans-serif;
+  --bg:#f7f6f2;
+  --surface:#faf9f6;
+  --surface2:#f0ede6;
+  --border:#e5e0d8;
+  --border2:#d8d2c8;
+  --text:#1c1a17;
+  --text2:#403c35;
+  --muted:#8c8780;
+  --muted2:#b8b2aa;
+  --accent:#c96a2c;
+  --accent-h:#b35e26;
+  --accent-bg:rgba(201,106,44,.09);
+  --accent-ring:rgba(201,106,44,.22);
+  --sw:218px;
+  --r:8px;
+  --r-sm:5px;
+  --sh:0 1px 2px rgba(0,0,0,.05),0 0 0 1px rgba(0,0,0,.04);
+  --shl:0 4px 20px rgba(0,0,0,.09),0 1px 4px rgba(0,0,0,.06);
+  --f:'Source Sans 3',-apple-system,'Helvetica Neue',sans-serif;
+  --fh:'Lora',Georgia,serif;
+  --t:.2s ease;
 }
-html.dark{--bg:#10131c;--surface:#181c27;--border:#252a3a;--text:#e8eaf0;--muted:#606880;--sh:0 2px 12px rgba(0,0,0,.3)}
-body{font-family:var(--f);background:var(--bg);color:var(--text);min-height:100vh;display:flex;transition:background .3s,color .3s}
+html.dark{
+  --bg:#1c1a17;
+  --surface:#242018;
+  --surface2:#2c2820;
+  --border:#38332a;
+  --border2:#4a4338;
+  --text:#f0ece4;
+  --text2:#c8c0b4;
+  --muted:#78726a;
+  --muted2:#504840;
+  --accent:#d9793a;
+  --accent-h:#e88844;
+  --accent-bg:rgba(217,121,58,.1);
+  --accent-ring:rgba(217,121,58,.25);
+  --sh:0 1px 3px rgba(0,0,0,.3),0 0 0 1px rgba(0,0,0,.2);
+  --shl:0 4px 20px rgba(0,0,0,.4),0 1px 4px rgba(0,0,0,.3);
+}
+html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+body{font-family:var(--f);background:var(--bg);color:var(--text);min-height:100vh;display:flex;transition:background var(--t),color var(--t)}
 
-/* ── Sidebar ── */
-#sb{width:var(--sw);min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:20px 0;position:fixed;inset:0 auto 0 0;z-index:40;transition:background .3s,border-color .3s}
-.sb-logo{display:flex;align-items:center;gap:10px;padding:0 18px 20px;border-bottom:1px solid var(--border);margin-bottom:12px}
-.sb-logo-ic{width:34px;height:34px;border-radius:9px;background:var(--grad);display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;flex-shrink:0}
-.sb-logo-tx{font-family:var(--fh);font-size:15px;font-weight:700;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.sb-nav{flex:1;padding:0 10px;display:flex;flex-direction:column;gap:2px}
-.ni{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;font-size:13.5px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .2s;text-decoration:none;border:none;background:none;width:100%;text-align:left}
-.ni:hover{background:var(--bg);color:var(--text)}
-.ni.active{background:var(--gsoft);color:var(--a1)}
-.ni-ic{width:18px;text-align:center;font-size:13px}
-.sb-ft{padding:12px 10px 0;border-top:1px solid var(--border);display:flex;gap:6px}
-.ib{width:34px;height:34px;border-radius:8px;background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .2s}
-.ib:hover{background:var(--bg);color:var(--text)}
-.sec-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:4px 18px 8px}
+/* ─── SIDEBAR ─── */
+#sb{
+  width:var(--sw);min-height:100vh;background:var(--surface);
+  border-right:1px solid var(--border);display:flex;flex-direction:column;
+  padding:20px 0;position:fixed;inset:0 auto 0 0;z-index:40;
+  transition:background var(--t),border-color var(--t);
+}
+.sb-logo{
+  display:flex;align-items:center;gap:9px;
+  padding:0 16px 18px;border-bottom:1px solid var(--border);margin-bottom:10px;
+}
+.sb-logo-ic{
+  width:30px;height:30px;border-radius:50%;background:var(--accent);
+  display:flex;align-items:center;justify-content:center;color:#fff;
+  font-size:13px;flex-shrink:0;box-shadow:0 2px 6px rgba(201,106,44,.3);
+}
+.sb-logo-tx{
+  font-family:var(--fh);font-size:15px;font-weight:600;color:var(--text);
+  letter-spacing:-.01em;
+}
+.sb-nav{flex:1;padding:0 8px;display:flex;flex-direction:column;gap:1px}
+.ni{
+  display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--r-sm);
+  font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;
+  transition:all var(--t);text-decoration:none;border:none;background:none;
+  width:100%;text-align:left;
+}
+.ni:hover{background:var(--surface2);color:var(--text2)}
+.ni.active{background:var(--accent-bg);color:var(--accent)}
+.ni-ic{width:16px;text-align:center;font-size:12px;flex-shrink:0}
+.sb-ft{padding:10px 8px 0;border-top:1px solid var(--border);display:flex;gap:5px}
+.ib{
+  width:32px;height:32px;border-radius:var(--r-sm);background:none;
+  border:1px solid var(--border);color:var(--muted);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:14px;
+  line-height:1;transition:all var(--t);box-shadow:var(--sh);
+}
+.ib i{font-size:14px;line-height:1;display:block}
+.ib:hover{background:var(--surface2);color:var(--text);border-color:var(--border2)}
+.sec-lbl{
+  font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--muted2);padding:4px 16px 6px;
+}
 
-/* ── Main ── */
+/* ─── MAIN ─── */
 #main{margin-left:var(--sw);flex:1;display:flex;flex-direction:column;min-height:100vh}
-.topbar{height:56px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:12px;position:sticky;top:0;z-index:30}
-.topbar-title{font-family:var(--fh);font-size:15px;font-weight:700;flex:1}
-.sdot{width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 2px rgba(34,197,94,.25)}
+.topbar{
+  height:52px;background:var(--surface);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 22px;gap:10px;
+  position:sticky;top:0;z-index:30;
+}
+.topbar-title{font-family:var(--fh);font-size:15px;font-weight:600;flex:1;color:var(--text)}
+.sdot{width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 2px rgba(34,197,94,.2);flex-shrink:0}
 .slbl{font-size:12px;color:var(--muted)}
-.pcont{padding:24px 24px 40px;flex:1}
+.pcont{padding:22px 22px 40px;flex:1}
 
-/* ── Cards ── */
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh);transition:background .3s,border-color .3s}
-.ch{padding:16px 20px 0;display:flex;align-items:center;gap:8px;margin-bottom:14px}
-.ch-ic{width:28px;height:28px;border-radius:7px;background:var(--gsoft);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--a1)}
-.ct{font-size:14px;font-weight:600;flex:1}
-.cb{padding:0 20px 20px}
+/* ─── CARDS ─── */
+.card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);box-shadow:var(--sh);
+  transition:background var(--t),border-color var(--t);
+}
+.ch{padding:14px 18px 0;display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.ch-ic{
+  width:26px;height:26px;border-radius:var(--r-sm);background:var(--accent-bg);
+  display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--accent);
+}
+.ct{font-size:13.5px;font-weight:600;flex:1;color:var(--text)}
+.cb{padding:0 18px 18px}
 
-/* ── Layout ── */
-.cols{display:grid;grid-template-columns:400px 1fr;gap:20px;align-items:start}
+/* ─── LAYOUT ─── */
+.cols{display:grid;grid-template-columns:390px 1fr;gap:18px;align-items:start}
 @media(max-width:900px){.cols{grid-template-columns:1fr}#sb{display:none}#main{margin-left:0}}
 
-/* ── Form ── */
-label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em}
-input[type=text],input[type=password],input[type=number],textarea,select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:9px 12px;font-size:13.5px;color:var(--text);font-family:var(--f);transition:border-color .2s,box-shadow .2s;outline:none}
-input:focus,textarea:focus,select:focus{border-color:var(--a1);box-shadow:0 0 0 3px rgba(29,155,240,.12)}
-textarea{resize:vertical;min-height:76px;line-height:1.5}
+/* ─── FORM ─── */
+label{
+  display:block;font-size:11px;font-weight:700;color:var(--muted);
+  margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em;
+}
+input[type=text],input[type=password],input[type=number],textarea,select{
+  width:100%;background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--r-sm);padding:8px 11px;font-size:13.5px;
+  color:var(--text);font-family:var(--f);transition:border-color var(--t),box-shadow var(--t);outline:none;
+}
+input::placeholder,textarea::placeholder{color:var(--muted2)}
+input:focus,textarea:focus,select:focus{
+  border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-ring);
+}
+textarea{resize:vertical;min-height:72px;line-height:1.5}
 select{appearance:none;cursor:pointer}
-.fr{margin-bottom:14px}
-.lr{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.fr{margin-bottom:13px}
+.lr{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
 .lr label{margin-bottom:0}
 
-/* ── Slider ── */
-.sr{display:flex;align-items:center;gap:10px}
-.sv{font-size:12px;font-weight:600;color:var(--a1);background:var(--gsoft);padding:2px 8px;border-radius:20px;min-width:52px;text-align:center;white-space:nowrap}
-input[type=range]{-webkit-appearance:none;flex:1;height:5px;background:var(--border);border-radius:5px;outline:none;cursor:pointer;border:none;padding:0}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--grad);cursor:pointer;box-shadow:0 2px 6px rgba(29,155,240,.35);transition:transform .15s}
-input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
+/* ─── SLIDER ─── */
+.sr{display:flex;align-items:center;gap:9px}
+.sv{
+  font-size:11.5px;font-weight:600;color:var(--accent);background:var(--accent-bg);
+  padding:2px 8px;border-radius:20px;min-width:52px;text-align:center;white-space:nowrap;
+  border:1px solid var(--accent-ring);
+}
+input[type=range]{
+  -webkit-appearance:none;flex:1;height:4px;background:var(--border2);
+  border-radius:4px;outline:none;cursor:pointer;border:none;padding:0;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:15px;height:15px;border-radius:50%;
+  background:var(--accent);cursor:pointer;box-shadow:0 1px 4px rgba(201,106,44,.4);
+  transition:transform .15s;
+}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.15)}
 
-/* ── Buttons ── */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 18px;border-radius:9px;font-size:13.5px;font-weight:600;cursor:pointer;transition:all .2s;border:none;font-family:var(--f)}
+/* ─── BUTTONS ─── */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  padding:8px 14px;border-radius:var(--r-sm);font-size:13px;font-weight:500;
+  cursor:pointer;transition:all var(--t);border:none;font-family:var(--f);white-space:nowrap;
+}
 .btn:focus{outline:none}
-.bp{background:var(--grad);color:#fff;box-shadow:0 4px 14px rgba(29,155,240,.35)}
-.bp:hover{filter:brightness(1.08);transform:translateY(-1px);box-shadow:0 6px 20px rgba(29,155,240,.45)}
+.bp{background:var(--accent);color:#fff;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.bp:hover{background:var(--accent-h);transform:translateY(-1px);box-shadow:0 3px 8px rgba(0,0,0,.15)}
 .bp:active{transform:translateY(0)}
-.bg{background:none;color:var(--muted);border:1px solid var(--border)}
-.bg:hover{background:var(--bg);color:var(--text)}
-.bsm{padding:5px 11px;font-size:12px;border-radius:7px;gap:5px}
+.bg{background:var(--surface);color:var(--text2);border:1px solid var(--border);box-shadow:var(--sh)}
+.bg:hover{background:var(--surface2);border-color:var(--border2)}
+.bsm{padding:4px 10px;font-size:12px;border-radius:var(--r-sm);gap:4px}
 .bfw{width:100%}
-.btn:disabled{opacity:.45;cursor:not-allowed;transform:none!important;filter:none!important}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
 
-/* ── Size presets ── */
-.size-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:6px}
-.sz{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:7px 4px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);cursor:pointer;transition:all .2s;gap:3px;font-size:11px;color:var(--muted);font-weight:500}
-.sz:hover{border-color:var(--a1);color:var(--a1);background:var(--gsoft)}
-.sz.active{border-color:var(--a1);color:var(--a1);background:var(--gsoft);font-weight:700}
-.sz-icon{font-size:14px;line-height:1}
-.sz-label{font-size:10.5px;font-weight:600;text-align:center}
-.sz-dim{font-size:9.5px;color:var(--muted);text-align:center}
-.sz.active .sz-dim{color:var(--a1)}
+/* ─── SIZE PRESETS ─── */
+.size-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:5px}
+.sz{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:6px 3px;border-radius:var(--r-sm);border:1px solid var(--border);
+  background:var(--surface2);cursor:pointer;transition:all var(--t);
+  gap:2px;font-size:11px;color:var(--muted);font-weight:500;
+}
+.sz:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
+.sz.active{border-color:var(--accent);color:var(--accent);background:var(--accent-bg);font-weight:700}
+.sz-icon{font-size:13px;line-height:1}
+.sz-label{font-size:10px;font-weight:600;text-align:center}
+.sz-dim{font-size:9px;color:var(--muted2);text-align:center}
+.sz.active .sz-dim{color:var(--accent)}
 
-/* ── Provider badge ── */
-.pbadge{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;padding:3px 10px;border-radius:20px}
+/* ─── PROVIDER BADGE ─── */
+.pbadge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:2px 9px;border-radius:20px}
 
-/* ── Enhance toggle ── */
-.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg);border-radius:9px;border:1px solid var(--border);cursor:pointer;transition:all .2s;user-select:none}
-.toggle-row:hover{border-color:var(--a1)}
-.toggle-row.on{border-color:var(--a1);background:var(--gsoft)}
+/* ─── ENHANCE TOGGLE ─── */
+.toggle-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:9px 11px;background:var(--surface2);border-radius:var(--r-sm);
+  border:1px solid var(--border);cursor:pointer;transition:all var(--t);user-select:none;
+}
+.toggle-row:hover{border-color:var(--accent)}
+.toggle-row.on{border-color:var(--accent);background:var(--accent-bg)}
 .tog-info{display:flex;flex-direction:column;gap:2px}
-.tog-title{font-size:13px;font-weight:600}
+.tog-title{font-size:12.5px;font-weight:600;color:var(--text)}
 .tog-sub{font-size:11px;color:var(--muted)}
-.tog-switch{width:36px;height:20px;border-radius:10px;background:var(--border);position:relative;transition:background .25s;flex-shrink:0}
-.toggle-row.on .tog-switch{background:var(--a1)}
-.tog-switch::after{content:'';position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .25s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
-.toggle-row.on .tog-switch::after{transform:translateX(16px)}
+.tog-switch{
+  width:34px;height:19px;border-radius:10px;background:var(--border2);
+  position:relative;transition:background .25s;flex-shrink:0;
+}
+.toggle-row.on .tog-switch{background:var(--accent)}
+.tog-switch::after{
+  content:'';position:absolute;top:3px;left:3px;
+  width:13px;height:13px;border-radius:50%;background:#fff;
+  transition:transform .25s;box-shadow:0 1px 3px rgba(0,0,0,.2);
+}
+.toggle-row.on .tog-switch::after{transform:translateX(15px)}
 
-/* ── Collapsible ── */
+/* ─── COLLAPSIBLE ─── */
 .coll{display:none}
 .coll.open{display:block}
 .ctog{cursor:pointer;user-select:none}
-.cic{transition:transform .25s;font-size:11px;color:var(--muted)}
+.cic{transition:transform .25s;font-size:10px;color:var(--muted)}
 .ctog.open .cic{transform:rotate(180deg)}
-.dvd{border:none;border-top:1px solid var(--border);margin:14px 0}
+.dvd{border:none;border-top:1px solid var(--border);margin:13px 0}
 
-/* ── Select wrap ── */
+/* ─── SELECT WRAP ─── */
 .selwrap{position:relative}
-.selwrap::after{content:'\\f078';font-family:'Font Awesome 6 Free';font-weight:900;font-size:10px;color:var(--muted);position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none}
+.selwrap::after{
+  content:'\\f078';font-family:'Font Awesome 6 Free';font-weight:900;
+  font-size:9px;color:var(--muted2);position:absolute;right:11px;
+  top:50%;transform:translateY(-50%);pointer-events:none;
+}
 
-/* ── Image area ── */
-#imgArea{aspect-ratio:1;background:var(--bg);border-radius:10px;border:1.5px dashed var(--border);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;transition:border-color .3s,aspect-ratio .3s}
-#imgArea.has-img{border-style:solid;cursor:zoom-in}
-#aiImg{width:100%;height:100%;object-fit:contain;border-radius:8px;display:none}
+/* ─── IMAGE AREA ─── */
+#imgArea{
+  aspect-ratio:1;background:var(--surface2);border-radius:var(--r);
+  border:1.5px dashed var(--border2);display:flex;align-items:center;
+  justify-content:center;position:relative;overflow:hidden;
+  transition:border-color var(--t),aspect-ratio var(--t);
+}
+#imgArea.has-img{border-style:solid;border-color:var(--border);cursor:zoom-in}
+#aiImg{width:100%;height:100%;object-fit:contain;border-radius:6px;display:none}
 #imgPH{text-align:center;color:var(--muted)}
-#imgPH i{font-size:36px;margin-bottom:10px;display:block;opacity:.35}
-#imgPH p{font-size:13px}
-.ldov{position:absolute;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;border-radius:8px;flex-direction:column;gap:0}
+#imgPH i{font-size:32px;margin-bottom:10px;display:block;opacity:.25}
+#imgPH p{font-size:13px;font-weight:500}
+.ldov{
+  position:absolute;inset:0;background:rgba(20,18,15,.75);backdrop-filter:blur(8px);
+  display:none;align-items:center;justify-content:center;
+  border-radius:6px;flex-direction:column;gap:0;
+}
 .ldov.show{display:flex}
-.spn{width:42px;height:42px;border:3px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
+.spn{
+  width:38px;height:38px;border:2.5px solid rgba(255,255,255,.2);
+  border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;
+  margin:0 auto 12px;
+}
 @keyframes spin{to{transform:rotate(360deg)}}
 .ldov p{font-size:13px;color:#fff;opacity:.85}
-.ldov .sub{font-size:11px;opacity:.55;margin-top:4px}
+.ldov .sub{font-size:11px;opacity:.5;margin-top:4px}
 .ldov .timer{font-size:22px;font-weight:700;color:#fff;font-family:var(--fh);margin-top:8px}
 
-/* ── Enhance indicator ── */
-#enhTag{display:none;align-items:center;gap:5px;font-size:11px;color:var(--a2);background:rgba(11,197,164,.1);border:1px solid rgba(11,197,164,.25);padding:3px 9px;border-radius:20px;margin-top:8px}
+/* ─── ENHANCE INDICATOR ─── */
+#enhTag{
+  display:none;align-items:center;gap:5px;font-size:11px;color:var(--accent);
+  background:var(--accent-bg);border:1px solid var(--accent-ring);
+  padding:3px 9px;border-radius:20px;margin-top:8px;
+}
 
-/* ── Image meta ── */
-.img-meta{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
-.mb{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--muted);background:var(--bg);border:1px solid var(--border);padding:4px 10px;border-radius:20px}
-.mb i{font-size:10px;color:var(--a1)}
-.mb.retry{color:#d97706;border-color:#fbbf24;background:rgba(251,191,36,.1)}
-.mb.retry i{color:#d97706}
+/* ─── IMAGE META ─── */
+.img-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.mb{
+  display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--muted);
+  background:var(--surface2);border:1px solid var(--border);padding:3px 9px;border-radius:20px;
+}
+.mb i{font-size:9px;color:var(--accent)}
+.mb.retry{color:#b35e26;border-color:var(--accent-ring);background:var(--accent-bg)}
+.mb.retry i{color:var(--accent)}
 
-/* ── History ── */
-.hist-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px;margin-top:12px}
-.hist-item{aspect-ratio:1;border-radius:8px;overflow:hidden;cursor:pointer;position:relative;border:2px solid transparent;transition:all .2s;background:var(--bg)}
-.hist-item:hover{border-color:var(--a1);transform:scale(1.04)}
+/* ─── HISTORY ─── */
+.hist-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:7px;margin-top:10px}
+.hist-item{
+  aspect-ratio:1;border-radius:var(--r-sm);overflow:hidden;cursor:pointer;
+  position:relative;border:1.5px solid var(--border);transition:all var(--t);background:var(--surface2);
+}
+.hist-item:hover{border-color:var(--accent);transform:scale(1.03)}
 .hist-item img{width:100%;height:100%;object-fit:cover}
-.hist-item .hi-del{position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:9px;display:none;align-items:center;justify-content:center;cursor:pointer}
+.hist-item .hi-del{
+  position:absolute;top:3px;right:3px;width:17px;height:17px;border-radius:50%;
+  background:rgba(0,0,0,.6);color:#fff;font-size:8px;
+  display:none;align-items:center;justify-content:center;cursor:pointer;
+}
 .hist-item:hover .hi-del{display:flex}
 .hist-empty{text-align:center;color:var(--muted);font-size:12.5px;padding:20px 0}
 
-/* ── Params panel ── */
-.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;margin-top:8px}
-.pc{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:11.5px}
-.pc .pk{color:var(--muted);display:block;margin-bottom:1px;font-size:10px;text-transform:uppercase;letter-spacing:.04em}
-.pc .pv{color:var(--text);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
-.pc.orig{border-color:rgba(11,197,164,.3);background:rgba(11,197,164,.04)}
-.pc.orig .pk{color:var(--a2)}
+/* ─── PARAMS PANEL ─── */
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:5px;margin-top:7px}
+.pc{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:6px 9px;font-size:11.5px}
+.pc .pk{color:var(--muted);display:block;margin-bottom:1px;font-size:9.5px;text-transform:uppercase;letter-spacing:.05em}
+.pc .pv{color:var(--text2);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.pc.orig{border-color:var(--accent-ring);background:var(--accent-bg)}
+.pc.orig .pk{color:var(--accent)}
 
-/* ── Download strip ── */
-#dlStrip{display:none;margin-top:14px;padding:12px 14px;background:var(--gsoft);border:1px solid rgba(29,155,240,.2);border-radius:10px;align-items:center;gap:12px}
+/* ─── DOWNLOAD STRIP ─── */
+#dlStrip{
+  display:none;margin-top:12px;padding:11px 13px;
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--r);align-items:center;gap:11px;
+}
 #dlStrip.show{display:flex}
-.dl-thumb{width:48px;height:48px;border-radius:7px;object-fit:cover;flex-shrink:0;border:1.5px solid rgba(29,155,240,.2)}
+.dl-thumb{width:44px;height:44px;border-radius:var(--r-sm);object-fit:cover;flex-shrink:0;border:1px solid var(--border)}
 .dl-info{flex:1;min-width:0}
-.dl-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dl-name{font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
 .dl-meta{font-size:11px;color:var(--muted);margin-top:2px}
-.dl-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;background:var(--grad);color:#fff;font-size:13px;font-weight:600;text-decoration:none;white-space:nowrap;box-shadow:0 3px 10px rgba(29,155,240,.3);transition:filter .2s,transform .2s;flex-shrink:0}
-.dl-btn:hover{filter:brightness(1.1);transform:translateY(-1px)}
-/* ── Toast ── */
-#toast{position:fixed;bottom:24px;right:24px;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px;box-shadow:var(--shl);transform:translateY(20px);opacity:0;transition:all .3s;z-index:999;pointer-events:none;max-width:340px}
-#toast.show{transform:translateY(0);opacity:1}
-#toast.ok{background:#dcfce7;color:#166534;border:1px solid #bbf7d0}
-#toast.err{background:#fee2e2;color:#991b1b;border:1px solid #fecaca}
-#toast.inf{background:#dbeafe;color:#1e40af;border:1px solid #bfdbfe}
-#toast.warn{background:#fef9c3;color:#854d0e;border:1px solid #fde047}
-html.dark #toast.ok{background:#14532d;color:#86efac;border-color:#166534}
-html.dark #toast.err{background:#7f1d1d;color:#fca5a5;border-color:#991b1b}
-html.dark #toast.inf{background:#1e3a8a;color:#93c5fd;border-color:#1d4ed8}
-html.dark #toast.warn{background:#78350f;color:#fcd34d;border-color:#d97706}
+.dl-btn{
+  display:inline-flex;align-items:center;gap:6px;padding:7px 13px;
+  border-radius:var(--r-sm);background:var(--accent);color:#fff;
+  font-size:12.5px;font-weight:500;text-decoration:none;white-space:nowrap;
+  box-shadow:0 1px 3px rgba(0,0,0,.12);transition:all var(--t);flex-shrink:0;
+}
+.dl-btn:hover{background:var(--accent-h);transform:translateY(-1px)}
 
-/* ── Login ── */
-#loginModal{position:fixed;inset:0;z-index:100;background:rgba(16,19,28,.78);backdrop-filter:blur(14px);display:flex;align-items:center;justify-content:center}
+/* ─── TOAST ─── */
+#toast{
+  position:fixed;bottom:20px;right:20px;padding:9px 14px;border-radius:var(--r);
+  font-size:13px;font-weight:500;display:flex;align-items:center;gap:7px;
+  box-shadow:var(--shl);transform:translateY(14px);opacity:0;
+  transition:all .25s cubic-bezier(.34,1.4,.64,1);z-index:999;pointer-events:none;max-width:320px;
+}
+#toast.show{transform:translateY(0);opacity:1}
+#toast.ok{background:#f0faf3;color:#166534;border:1px solid #bbf0cc}
+#toast.err{background:#fef3ee;color:#9a3412;border:1px solid #fcd4bb}
+#toast.inf{background:var(--surface);color:var(--text2);border:1px solid var(--border)}
+#toast.warn{background:#fef9ee;color:#8a4a10;border:1px solid #f5d4a0}
+html.dark #toast.ok{background:#0d3320;color:#6ee79a;border-color:#1a5c38}
+html.dark #toast.err{background:#3d1408;color:#fca882;border-color:#7a2a14}
+html.dark #toast.warn{background:#3d2208;color:#f5c070;border-color:#7a4a14}
+
+/* ─── LOGIN ─── */
+#loginModal{
+  position:fixed;inset:0;z-index:100;background:rgba(20,18,15,.72);
+  backdrop-filter:blur(16px);display:flex;align-items:center;justify-content:center;
+}
 #loginModal.hidden{display:none}
-.lc{background:var(--surface);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shl);padding:40px 36px;width:100%;max-width:380px;text-align:center}
-.lc-ic{width:60px;height:60px;border-radius:16px;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:26px;color:#fff;margin:0 auto 20px}
-.lc-title{font-family:var(--fh);font-size:22px;font-weight:700;margin-bottom:6px}
-.lc-sub{font-size:13px;color:var(--muted);margin-bottom:26px}
-.lerr{display:none;background:#fee2e2;color:#991b1b;border:1px solid #fecaca;border-radius:8px;padding:8px 12px;font-size:13px;margin-bottom:14px;text-align:left}
-html.dark .lerr{background:#7f1d1d;color:#fca5a5;border-color:#991b1b}
+.lc{
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  box-shadow:var(--shl);padding:38px 34px;width:100%;max-width:360px;text-align:center;
+}
+.lc-ic{
+  width:50px;height:50px;border-radius:50%;background:var(--accent);
+  display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;
+  margin:0 auto 16px;box-shadow:0 3px 10px rgba(201,106,44,.3);
+}
+.lc-title{font-family:var(--fh);font-size:20px;font-weight:600;margin-bottom:5px;color:var(--text)}
+.lc-sub{font-size:13px;color:var(--muted);margin-bottom:22px}
+.lerr{
+  display:none;background:#fef3ee;color:#9a3412;border:1px solid #fcd4bb;
+  border-radius:var(--r-sm);padding:7px 11px;font-size:12.5px;margin-bottom:11px;text-align:left;
+}
+html.dark .lerr{background:rgba(154,52,18,.2);color:#fca882;border-color:rgba(154,52,18,.35)}
 .lerr.show{display:block}
 
-/* ── Lightbox ── */
-#lb{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.92);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center}
+/* ─── LIGHTBOX ─── */
+#lb{
+  position:fixed;inset:0;z-index:200;background:rgba(20,18,15,.9);
+  backdrop-filter:blur(12px);display:none;align-items:center;justify-content:center;
+}
 #lb.show{display:flex}
-#lbImg{max-width:92vw;max-height:92vh;object-fit:contain;border-radius:10px;box-shadow:0 30px 80px rgba(0,0,0,.6)}
-#lbClose{position:absolute;top:20px;right:20px;width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s}
-#lbClose:hover{background:rgba(255,255,255,.22)}
+#lbImg{max-width:92vw;max-height:92vh;object-fit:contain;border-radius:var(--r);box-shadow:0 24px 64px rgba(0,0,0,.6)}
+#lbClose{
+  position:absolute;top:18px;right:18px;width:36px;height:36px;
+  border-radius:var(--r-sm);background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.18);color:#fff;font-size:14px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:background var(--t);
+}
+#lbClose:hover{background:rgba(255,255,255,.2)}
 
 .hidden{display:none!important}
 </style>
@@ -221,13 +399,13 @@ html.dark .lerr{background:#7f1d1d;color:#fca5a5;border-color:#991b1b}
   <div class="lc">
     <div class="lc-ic"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
     <div class="lc-title">AI 文生图</div>
-    <div class="lc-sub">Powered by Cloudflare Workers · 请输入访问密码</div>
+    <div class="lc-sub">Powered by Cloudflare Workers</div>
     <div id="lerr" class="lerr"><i class="fa-solid fa-triangle-exclamation"></i> 密码错误，请重试</div>
     <div class="fr" style="text-align:left">
       <label>访问密码</label>
       <input type="password" id="lp" placeholder="请输入密码…" autocomplete="current-password">
     </div>
-    <button class="btn bp bfw" id="lbtn" style="height:42px;font-size:14px">
+    <button class="btn bp bfw" id="lbtn" style="height:40px;font-size:13.5px">
       <i class="fa-solid fa-right-to-bracket"></i> 进入
     </button>
   </div>
@@ -242,29 +420,36 @@ html.dark .lerr{background:#7f1d1d;color:#fca5a5;border-color:#991b1b}
 <!-- SIDEBAR -->
 <aside id="sb">
   <div class="sb-logo">
-    <div class="sb-logo-ic"><i class="fa-solid fa-cloud"></i></div>
+    <div class="sb-logo-ic"><i class="fa-solid fa-wand-magic-sparkles" style="font-size:11px"></i></div>
     <span class="sb-logo-tx">AI 文生图</span>
   </div>
   <div class="sec-lbl">功能</div>
   <nav class="sb-nav">
-    <button class="ni active"><span class="ni-ic"><i class="fa-solid fa-wand-magic-sparkles"></i></span>文生图</button>
-    <button class="ni" id="histNavBtn"><span class="ni-ic"><i class="fa-solid fa-clock-rotate-left"></i></span>历史记录<span id="histCount" style="margin-left:auto;font-size:10px;background:var(--gsoft);color:var(--a1);padding:1px 7px;border-radius:10px;display:none">0</span></button>
-    <button class="ni" style="opacity:.4;cursor:not-allowed" disabled><span class="ni-ic"><i class="fa-solid fa-image"></i></span>图生图<span style="margin-left:auto;font-size:10px;background:var(--gsoft);color:var(--a1);padding:1px 7px;border-radius:10px">Soon</span></button>
+    <button class="ni active">
+      <span class="ni-ic"><i class="fa-solid fa-wand-magic-sparkles"></i></span>文生图
+    </button>
+    <button class="ni" id="histNavBtn">
+      <span class="ni-ic"><i class="fa-solid fa-clock-rotate-left"></i></span>历史记录
+      <span id="histCount" style="margin-left:auto;font-size:10px;background:var(--accent-bg);color:var(--accent);padding:1px 7px;border-radius:10px;border:1px solid var(--accent-ring);display:none">0</span>
+    </button>
+    <button class="ni" style="opacity:.38;cursor:not-allowed" disabled>
+      <span class="ni-ic"><i class="fa-solid fa-image"></i></span>图生图
+      <span style="margin-left:auto;font-size:10px;background:var(--surface2);color:var(--muted);padding:1px 7px;border-radius:10px;border:1px solid var(--border)">Soon</span>
+    </button>
   </nav>
-  <div style="margin-top:14px">
+  <div style="margin-top:12px">
     <div class="sec-lbl">工具</div>
     <nav class="sb-nav">
       <a class="ni" href="https://your-gallery.workers.dev" target="_blank">
         <span class="ni-ic"><i class="fa-solid fa-images"></i></span>AI 图库
-        <span style="margin-left:auto;font-size:10px;opacity:.5"><i class="fa-solid fa-arrow-up-right-from-square"></i></span>
+        <span style="margin-left:auto;font-size:9px;opacity:.45"><i class="fa-solid fa-arrow-up-right-from-square"></i></span>
       </a>
       <a class="ni" href="https://your-image-host.com" target="_blank">
         <span class="ni-ic"><i class="fa-solid fa-photo-film"></i></span>图床
-        <span style="margin-left:auto;font-size:10px;opacity:.5"><i class="fa-solid fa-arrow-up-right-from-square"></i></span>
+        <span style="margin-left:auto;font-size:9px;opacity:.45"><i class="fa-solid fa-arrow-up-right-from-square"></i></span>
       </a>
     </nav>
   </div>
-
   <div style="flex:1"></div>
   <div class="sb-ft">
     <button class="ib" id="themeToggle" title="切换主题"><i class="fa-solid fa-moon" id="themeIcon"></i></button>
@@ -275,22 +460,25 @@ html.dark .lerr{background:#7f1d1d;color:#fca5a5;border-color:#991b1b}
 <!-- MAIN -->
 <div id="main">
   <div class="topbar">
-    <div class="topbar-title"><i class="fa-solid fa-wand-magic-sparkles" style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-right:8px"></i>文生图</div>
-    <div class="sdot"></div><span class="slbl">Workers AI 在线</span>
+    <div class="topbar-title">
+      <i class="fa-solid fa-wand-magic-sparkles" style="color:var(--accent);margin-right:8px;font-size:13px"></i>文生图
+    </div>
+    <div class="sdot"></div>
+    <span class="slbl">Workers AI 在线</span>
   </div>
 
   <div class="pcont">
     <div class="cols">
 
       <!-- LEFT PANEL -->
-      <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;flex-direction:column;gap:13px">
 
         <!-- Basic -->
         <div class="card">
           <div class="ch">
             <div class="ch-ic"><i class="fa-solid fa-sliders"></i></div>
             <span class="ct">基本设置</span>
-            <button class="btn bg bsm" id="randomBtn"><i class="fa-solid fa-dice"></i> 随机提示词</button>
+            <button class="btn bg bsm" id="randomBtn"><i class="fa-solid fa-dice"></i> 随机</button>
           </div>
           <div class="cb">
             <div class="fr">
@@ -311,7 +499,6 @@ html.dark .lerr{background:#7f1d1d;color:#fca5a5;border-color:#991b1b}
                 <span id="pvnote" style="font-size:11px;color:var(--muted)"></span>
               </div>
             </div>
-
             <!-- Enhance toggle -->
             <div class="fr" style="margin-bottom:0">
               <label>提示词增强</label>
@@ -322,7 +509,7 @@ html.dark .lerr{background:#7f1d1d;color:#fca5a5;border-color:#991b1b}
                 </div>
                 <div class="tog-switch"></div>
               </div>
-              <div id="enhTag"><i class="fa-solid fa-sparkles"></i> 已增强</div>
+              <div id="enhTag"><i class="fa-solid fa-sparkles"></i> 提示词已增强</div>
             </div>
           </div>
         </div>
@@ -335,7 +522,6 @@ html.dark .lerr{background:#7f1d1d;color:#fca5a5;border-color:#991b1b}
             <i class="fa-solid fa-chevron-down cic"></i>
           </div>
           <div class="cb coll" id="advBody">
-
             <!-- Size presets -->
             <div class="fr">
               <label>快速尺寸</label>
@@ -382,10 +568,7 @@ html.dark .lerr{background:#7f1d1d;color:#fca5a5;border-color:#991b1b}
                 </div>
               </div>
             </div>
-
             <hr class="dvd">
-
-            <!-- Manual sliders -->
             <div class="fr">
               <div class="lr"><label>宽度</label><span class="sv" id="wv">1024px</span></div>
               <input type="range" id="width" min="256" max="2048" step="64" value="1024">
@@ -412,28 +595,31 @@ html.dark .lerr{background:#7f1d1d;color:#fca5a5;border-color:#991b1b}
           </div>
         </div>
 
-        <button class="btn bp bfw" id="genBtn" style="height:46px;font-size:15px;border-radius:12px">
+        <button class="btn bp bfw" id="genBtn" style="height:44px;font-size:14px;border-radius:var(--r)">
           <i class="fa-solid fa-wand-magic-sparkles"></i> 生成图像
         </button>
       </div>
 
       <!-- RIGHT PANEL -->
-      <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;flex-direction:column;gap:13px">
 
         <!-- Result -->
         <div class="card">
           <div class="ch">
             <div class="ch-ic"><i class="fa-solid fa-image"></i></div>
             <span class="ct">生成结果</span>
-            <div style="display:flex;gap:7px;margin-left:auto">
-              <button class="btn bg bsm hidden" id="reuseBtn" title="用相同参数重新生成"><i class="fa-solid fa-rotate-right"></i> 重新生成</button>
+            <div style="display:flex;gap:6px;margin-left:auto">
+              <button class="btn bg bsm hidden" id="reuseBtn"><i class="fa-solid fa-rotate-right"></i> 重新生成</button>
               <button class="btn bg bsm hidden" id="cpBtn"><i class="fa-solid fa-copy"></i> 参数</button>
               <button class="btn bg bsm hidden" id="dlBtn"><i class="fa-solid fa-download"></i> 下载</button>
             </div>
           </div>
           <div class="cb">
             <div id="imgArea">
-              <div id="imgPH"><i class="fa-regular fa-image"></i><p>点击「生成图像」开始创作</p></div>
+              <div id="imgPH">
+                <i class="fa-regular fa-image"></i>
+                <p>点击「生成图像」开始创作</p>
+              </div>
               <img id="aiImg" alt="生成图像">
               <div class="ldov" id="ldov">
                 <div class="spn"></div>
@@ -442,6 +628,7 @@ html.dark .lerr{background:#7f1d1d;color:#fca5a5;border-color:#991b1b}
                 <div class="timer" id="ldTimer">0s</div>
               </div>
             </div>
+
             <!-- Download strip -->
             <div id="dlStrip">
               <img id="dlThumb" class="dl-thumb" src="" alt="">
@@ -449,17 +636,18 @@ html.dark .lerr{background:#7f1d1d;color:#fca5a5;border-color:#991b1b}
                 <div class="dl-name" id="dlName">生成图像.png</div>
                 <div class="dl-meta" id="dlMeta">点击右侧按钮下载到本地</div>
               </div>
-              <div style="display:flex;gap:7px;flex-shrink:0">
+              <div style="display:flex;gap:6px;flex-shrink:0">
                 <a id="dlLink" class="dl-btn" href="#" download="ai-image.png">
                   <i class="fa-solid fa-download"></i> 下载
                 </a>
               </div>
             </div>
+
             <!-- Image host URL strip -->
-            <div id="hostStrip" style="display:none;margin-top:8px;padding:9px 12px;background:var(--bg);border:1px solid var(--border);border-radius:9px;align-items:center;gap:8px">
-              <i class="fa-solid fa-link" style="color:var(--a2);font-size:12px;flex-shrink:0"></i>
-              <span style="font-size:11.5px;color:var(--muted);flex-shrink:0">图床直链</span>
-              <input id="hostUrl" type="text" readonly style="flex:1;font-size:12px;padding:4px 8px;border-radius:6px;background:var(--surface);border:1px solid var(--border);color:var(--text);cursor:text;min-width:0" value="">
+            <div id="hostStrip" style="display:none;margin-top:8px;padding:8px 11px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);align-items:center;gap:8px">
+              <i class="fa-solid fa-link" style="color:var(--accent);font-size:11px;flex-shrink:0"></i>
+              <span style="font-size:11px;color:var(--muted);flex-shrink:0;font-weight:600">图床直链</span>
+              <input id="hostUrl" type="text" readonly style="flex:1;font-size:12px;padding:4px 8px;border-radius:var(--r-sm);background:var(--surface);border:1px solid var(--border);color:var(--text);cursor:text;min-width:0" value="">
               <button id="copyHostUrl" class="btn bg bsm" style="flex-shrink:0;gap:4px">
                 <i class="fa-solid fa-copy"></i> 复制
               </button>
@@ -467,15 +655,18 @@ html.dark .lerr{background:#7f1d1d;color:#fca5a5;border-color:#991b1b}
                 <i class="fa-solid fa-arrow-up-right-from-square"></i>
               </a>
             </div>
+
             <div id="enhTag"><i class="fa-solid fa-sparkles"></i> 提示词已由 AI 增强优化</div>
             <div class="img-meta hidden" id="imgMeta">
               <span class="mb"><i class="fa-regular fa-clock"></i><span id="genTime">-</span></span>
               <span class="mb"><i class="fa-solid fa-microchip"></i><span id="usedMdl">-</span></span>
-              <span class="mb hidden" id="retryBadge"><i class="fa-solid fa-rotate-right"></i>已自动重试</span>
+              <span class="mb hidden retry" id="retryBadge"><i class="fa-solid fa-rotate-right"></i>已自动重试</span>
             </div>
             <div id="paramsP" class="hidden">
               <hr class="dvd">
-              <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px"><i class="fa-solid fa-list-check" style="margin-right:5px"></i>生成参数</div>
+              <div style="font-size:10.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">
+                <i class="fa-solid fa-list-check" style="margin-right:5px;color:var(--accent)"></i>生成参数
+              </div>
               <div class="pgrid" id="pgrid"></div>
             </div>
           </div>
@@ -486,7 +677,9 @@ html.dark .lerr{background:#7f1d1d;color:#fca5a5;border-color:#991b1b}
           <div class="ch">
             <div class="ch-ic"><i class="fa-solid fa-clock-rotate-left"></i></div>
             <span class="ct">历史记录</span>
-            <button class="btn bg bsm" id="clearHistBtn" style="margin-left:auto"><i class="fa-solid fa-trash"></i> 清空</button>
+            <button class="btn bg bsm" id="clearHistBtn" style="margin-left:auto">
+              <i class="fa-solid fa-trash"></i> 清空
+            </button>
           </div>
           <div class="cb">
             <div class="hist-grid" id="histGrid"></div>
@@ -504,7 +697,6 @@ html.dark .lerr{background:#7f1d1d;color:#fca5a5;border-color:#991b1b}
 (function(){
 'use strict';
 var models=[],prompts=[],curParams=null,enhOn=false,genTimer=null;
-var HIST_KEY='ai_img_history';
 
 // ── Theme ──────────────────────────────────────────────────────────────────
 var html=document.documentElement;
@@ -583,7 +775,6 @@ function setSizePreset(w,h){
   document.getElementById('height').value=h;
   document.getElementById('wv').textContent=w+'px';
   document.getElementById('hv').textContent=h+'px';
-  // update image area aspect ratio preview
   var area=document.getElementById('imgArea');
   var ratio=w/h;
   area.style.aspectRatio=ratio>0?ratio+'/1':'1';
@@ -601,7 +792,6 @@ function sl(id,vid,fmt){
   var el=document.getElementById(id),vl=document.getElementById(vid);
   el.addEventListener('input',function(){
     vl.textContent=fmt(el.value);
-    // deselect size preset if manual
     if(id==='width'||id==='height')szBtns.forEach(function(x){x.classList.remove('active');});
   });
 }
@@ -615,18 +805,20 @@ document.getElementById('randSeed').addEventListener('click',function(){
 
 // ── Provider badge ─────────────────────────────────────────────────────────
 var PV_CFG={
-  cloudflare: {label:'Cloudflare AI',icon:'fa-cloud',bg:'rgba(249,115,22,.12)',color:'#ea580c',note:'已绑定 Workers AI，免费额度内无需额外配置'},
-  pollinations:{label:'Pollinations AI',icon:'fa-seedling',bg:'rgba(16,185,129,.12)',color:'#059669',note:'完全免费，无需 API Key，直接调用'},
-  huggingface:{label:'HuggingFace',icon:'fa-robot',bg:'rgba(251,191,36,.12)',color:'#d97706',note:'需在 Worker 中设置 HF_TOKEN 环境变量'},
+  cloudflare:{label:'Cloudflare AI',icon:'fa-cloud',bg:'rgba(201,106,44,.1)',color:'var(--accent)',note:'已绑定 Workers AI，免费额度内无需额外配置'},
+  pollinations:{label:'Pollinations AI',icon:'fa-seedling',bg:'rgba(34,197,94,.1)',color:'#16a34a',note:'完全免费，无需 API Key，直接调用'},
+  huggingface:{label:'HuggingFace',icon:'fa-robot',bg:'rgba(251,191,36,.1)',color:'#b45309',note:'需在 Worker 中设置 HF_TOKEN 环境变量'},
 };
 function updatePvBadge(id){
   var m=models.find(function(x){return x.id===id;});
   var el=document.getElementById('pvinfo');
   if(!m){el.style.display='none';return;}
-  var cfg=PV_CFG[m.provider]||{label:m.provider,icon:'fa-circle',bg:'#eee',color:'#666',note:''};
+  var cfg=PV_CFG[m.provider]||{label:m.provider,icon:'fa-circle',bg:'',color:'var(--muted)',note:''};
   var b=document.getElementById('pvbadge');
   b.innerHTML='<i class="fa-solid '+cfg.icon+'"></i> '+cfg.label;
   b.style.background=cfg.bg;b.style.color=cfg.color;
+  b.style.border='1px solid '+cfg.bg.replace('.1)','.25)');
+  b.style.padding='2px 9px';b.style.borderRadius='20px';
   document.getElementById('pvnote').textContent=cfg.note;
   el.style.display='flex';
 }
@@ -648,7 +840,7 @@ async function loadModels(){
       });
       sel.appendChild(og);
     });
-    var defM=models.find(function(m){return m.provider==='pollinations';});
+    var defM=models.find(function(m){return m.id==='cf-flux-schnell';});
     if(defM)sel.value=defM.id;
     updatePvBadge(sel.value);
     sel.addEventListener('change',function(){updatePvBadge(sel.value);});
@@ -686,36 +878,22 @@ function openDB(){
 async function getDB(){if(!db)db=await openDB();return db;}
 async function histAdd(item){
   var d=await getDB();
-  return new Promise(function(res,rej){
-    var tx=d.transaction('items','readwrite');
-    tx.objectStore('items').add(item);
-    tx.oncomplete=res;tx.onerror=rej;
-  });
+  return new Promise(function(res,rej){var tx=d.transaction('items','readwrite');tx.objectStore('items').add(item);tx.oncomplete=res;tx.onerror=rej;});
 }
 async function histGetAll(){
   var d=await getDB();
   return new Promise(function(res){
-    var tx=d.transaction('items','readonly');
-    var req=tx.objectStore('items').getAll();
-    req.onsuccess=function(){res(req.result.reverse());};
-    req.onerror=function(){res([]);};
+    var tx=d.transaction('items','readonly');var req=tx.objectStore('items').getAll();
+    req.onsuccess=function(){res(req.result.reverse());};req.onerror=function(){res([]);};
   });
 }
 async function histDelete(id){
   var d=await getDB();
-  return new Promise(function(res,rej){
-    var tx=d.transaction('items','readwrite');
-    tx.objectStore('items').delete(id);
-    tx.oncomplete=res;tx.onerror=rej;
-  });
+  return new Promise(function(res,rej){var tx=d.transaction('items','readwrite');tx.objectStore('items').delete(id);tx.oncomplete=res;tx.onerror=rej;});
 }
 async function histClear(){
   var d=await getDB();
-  return new Promise(function(res,rej){
-    var tx=d.transaction('items','readwrite');
-    tx.objectStore('items').clear();
-    tx.oncomplete=res;tx.onerror=rej;
-  });
+  return new Promise(function(res,rej){var tx=d.transaction('items','readwrite');tx.objectStore('items').clear();tx.oncomplete=res;tx.onerror=rej;});
 }
 
 async function renderHistory(){
@@ -723,28 +901,17 @@ async function renderHistory(){
   var grid=document.getElementById('histGrid');
   var card=document.getElementById('histCard');
   var cnt=document.getElementById('histCount');
-  if(!items.length){
-    card.style.display='none';
-    cnt.style.display='none';
-    return;
-  }
-  card.style.display='';
-  cnt.style.display='';
-  cnt.textContent=items.length;
+  if(!items.length){card.style.display='none';cnt.style.display='none';return;}
+  card.style.display='';cnt.style.display='';cnt.textContent=items.length;
   grid.innerHTML='';
   items.forEach(function(item){
     var d=document.createElement('div');d.className='hist-item';d.title=item.prompt||'';
     var img=document.createElement('img');img.src=item.img;img.loading='lazy';
     var del=document.createElement('div');del.className='hi-del';del.innerHTML='<i class="fa-solid fa-xmark"></i>';
-    del.addEventListener('click',function(e){
-      e.stopPropagation();
-      histDelete(item.id).then(renderHistory);
-    });
+    del.addEventListener('click',function(e){e.stopPropagation();histDelete(item.id).then(renderHistory);});
     d.appendChild(img);d.appendChild(del);
     d.addEventListener('click',function(){
-      // Show in lightbox
       lbImg.src=item.img;lb.classList.add('show');
-      // Also load params
       if(item.params){
         curParams=item.params;
         renderParams(item.params,item.enhPrompt,item.origPrompt);
@@ -762,14 +929,11 @@ document.getElementById('histNavBtn').addEventListener('click',function(){
 document.getElementById('clearHistBtn').addEventListener('click',function(){
   histClear().then(function(){renderHistory();toast('历史记录已清空','inf');});
 });
-
 renderHistory();
 
 // ── Generate ───────────────────────────────────────────────────────────────
 document.getElementById('genBtn').addEventListener('click',generate);
-document.getElementById('reuseBtn').addEventListener('click',function(){
-  if(curParams)generate(true);
-});
+document.getElementById('reuseBtn').addEventListener('click',function(){if(curParams)generate(true);});
 
 async function generate(reuse){
   var overlay=document.getElementById('ldov');
@@ -788,25 +952,22 @@ async function generate(reuse){
   document.getElementById('retryBadge').classList.add('hidden');
   document.getElementById('genBtn').disabled=true;
 
-  // Elapsed timer
   var t0=performance.now();
   var timerEl=document.getElementById('ldTimer');
   clearInterval(genTimer);
-  genTimer=setInterval(function(){
-    timerEl.textContent=((performance.now()-t0)/1000).toFixed(1)+'s';
-  },200);
+  genTimer=setInterval(function(){timerEl.textContent=((performance.now()-t0)/1000).toFixed(1)+'s';},200);
 
   var params=reuse&&curParams?Object.assign({},curParams,{password:sessionStorage.getItem('apw')||''}):{
-    password: sessionStorage.getItem('apw')||'',
-    prompt:   document.getElementById('prompt').value||prompts[Math.floor(Math.random()*prompts.length)]||'a beautiful landscape',
-    negative_prompt: document.getElementById('neg').value||'',
-    model:    document.getElementById('model').value,
-    width:    parseInt(document.getElementById('width').value)||1024,
-    height:   parseInt(document.getElementById('height').value)||1024,
+    password:sessionStorage.getItem('apw')||'',
+    prompt:document.getElementById('prompt').value||prompts[Math.floor(Math.random()*prompts.length)]||'a beautiful landscape',
+    negative_prompt:document.getElementById('neg').value||'',
+    model:document.getElementById('model').value,
+    width:parseInt(document.getElementById('width').value)||1024,
+    height:parseInt(document.getElementById('height').value)||1024,
     num_steps:parseInt(document.getElementById('steps').value)||20,
-    guidance: parseFloat(document.getElementById('guidance').value)||7.5,
-    seed:     parseInt(document.getElementById('seed').value)||Math.floor(Math.random()*4294967295),
-    enhance:  enhOn,
+    guidance:parseFloat(document.getElementById('guidance').value)||7.5,
+    seed:parseInt(document.getElementById('seed').value)||Math.floor(Math.random()*4294967295),
+    enhance:enhOn,
   };
   if(!reuse)curParams=Object.assign({},params);
 
@@ -836,7 +997,6 @@ async function generate(reuse){
       aiImg.style.display='block';ph.style.display='none';
       area.classList.add('has-img');
 
-      // Check if enhanced
       var wasEnhanced=res.headers.get('x-enhanced')==='true'||enhOn;
       if(wasEnhanced)enhTagEl.style.display='flex';
 
@@ -847,7 +1007,7 @@ async function generate(reuse){
       renderParams(params,null,null);
       ['cpBtn','dlBtn','reuseBtn'].forEach(function(id){document.getElementById(id).classList.remove('hidden');});
       document.getElementById('genBtn').disabled=false;
-      // Update download strip
+
       var dlStrip=document.getElementById('dlStrip');
       var dlLink=document.getElementById('dlLink');
       var dlThumb=document.getElementById('dlThumb');
@@ -855,28 +1015,23 @@ async function generate(reuse){
       var dlMeta=document.getElementById('dlMeta');
       var mdlName=getMdlName(params.model);
       var fname='ai-'+mdlName.replace(/[^a-zA-Z0-9]/g,'-')+'-'+Date.now()+'.png';
-      dlThumb.src=b64;
-      dlLink.href=b64;
-      dlLink.download=fname;
+      dlThumb.src=b64;dlLink.href=b64;dlLink.download=fname;
       dlName.textContent=fname;
       dlMeta.textContent=params.width+'×'+params.height+' · '+mdlName+' · '+elapsed+'s';
       dlStrip.classList.add('show');
-      // Show image host URL if returned
+
       var imageUrl=res.headers.get('x-image-url');
       var hostStrip=document.getElementById('hostStrip');
       var hostUrlInput=document.getElementById('hostUrl');
       var openHostUrl=document.getElementById('openHostUrl');
       if(imageUrl){
-        hostUrlInput.value=imageUrl;
-        openHostUrl.href=imageUrl;
+        hostUrlInput.value=imageUrl;openHostUrl.href=imageUrl;
         hostStrip.style.display='flex';
         toast('生成成功，已上传图床 🎨','ok');
       }else{
         hostStrip.style.display='none';
         toast('生成成功 🎨','ok');
       }
-
-      // Save to history
       histAdd({img:b64,prompt:params.prompt,params:params,ts:Date.now()}).then(renderHistory).catch(function(){});
     };
   }catch(err){
@@ -887,20 +1042,16 @@ async function generate(reuse){
   }
 }
 
-// ── Copy params ────────────────────────────────────────────────────────────
+// ── Copy host URL ──────────────────────────────────────────────────────────
 document.getElementById('copyHostUrl').addEventListener('click',function(){
   var url=document.getElementById('hostUrl').value;
   if(!url)return;
-  navigator.clipboard.writeText(url).then(function(){
-    toast('图床链接已复制','ok');
-  }).catch(function(){
-    // fallback
-    document.getElementById('hostUrl').select();
-    document.execCommand('copy');
-    toast('图床链接已复制','ok');
+  navigator.clipboard.writeText(url).then(function(){toast('图床链接已复制','ok');}).catch(function(){
+    document.getElementById('hostUrl').select();document.execCommand('copy');toast('图床链接已复制','ok');
   });
 });
 
+// ── Copy params ────────────────────────────────────────────────────────────
 document.getElementById('cpBtn').addEventListener('click',function(){
   if(!curParams)return;
   var t=Object.entries(curParams).filter(function(kv){return kv[0]!=='password';})
@@ -920,9 +1071,7 @@ document.getElementById('dlBtn').addEventListener('click',async function(){
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 function blobToB64(blob){
-  return new Promise(function(res,rej){
-    var r=new FileReader();r.onloadend=function(){res(r.result);};r.onerror=rej;r.readAsDataURL(blob);
-  });
+  return new Promise(function(res,rej){var r=new FileReader();r.onloadend=function(){res(r.result);};r.onerror=rej;r.readAsDataURL(blob);});
 }
 function getMdlName(id){var m=models.find(function(m){return m.id===id;});return m?m.name:id;}
 
@@ -954,60 +1103,25 @@ function renderParams(params,enhPrompt,origPrompt){
 
 // ── Models ────────────────────────────────────────────────────────────────────
 const CF_MODELS = [
-  {
-    id: 'cf-flux-dev',
-    name: 'FLUX.1-dev FP8',
-    description: '旗舰质量 · 细节极佳',
-    provider: 'cloudflare',
-    key: '@cf/black-forest-labs/flux-1-dev-fp8',
-    type: 'flux-dev',
-  },
-  {
-    id: 'cf-flux-schnell',
-    name: 'FLUX.1 Schnell',
-    description: '极速生成 · 质量均衡',
-    provider: 'cloudflare',
-    key: '@cf/black-forest-labs/flux-1-schnell',
-    type: 'flux-schnell',
-  },
-  {
-    id: 'cf-sdxl',
-    name: 'Stable Diffusion XL',
-    description: 'SDXL 高质量通用',
-    provider: 'cloudflare',
-    key: '@cf/stabilityai/stable-diffusion-xl-base-1.0',
-    type: 'sdxl',
-  },
-  {
-    id: 'cf-sdxl-lightning',
-    name: 'SDXL Lightning',
-    description: '极速 SDXL 版本',
-    provider: 'cloudflare',
-    key: '@cf/bytedance/stable-diffusion-xl-lightning',
-    type: 'sdxl',
-  },
-  {
-    id: 'cf-dreamshaper',
-    name: 'DreamShaper 8 LCM',
-    description: '增强真实感微调模型',
-    provider: 'cloudflare',
-    key: '@cf/lykon/dreamshaper-8-lcm',
-    type: 'sdxl',
-  },
+  { id:'cf-flux-dev',      name:'FLUX.1-dev FP8',    description:'旗舰质量 · 细节极佳',    provider:'cloudflare', key:'@cf/black-forest-labs/flux-1-dev-fp8',                      type:'flux-dev' },
+  { id:'cf-flux-schnell',  name:'FLUX.1 Schnell',     description:'极速生成 · 质量均衡',    provider:'cloudflare', key:'@cf/black-forest-labs/flux-1-schnell',                       type:'flux-schnell' },
+  { id:'cf-sdxl',          name:'Stable Diffusion XL',description:'SDXL 高质量通用',        provider:'cloudflare', key:'@cf/stabilityai/stable-diffusion-xl-base-1.0',              type:'sdxl' },
+  { id:'cf-sdxl-lightning',name:'SDXL Lightning',     description:'极速 SDXL 版本',          provider:'cloudflare', key:'@cf/bytedance/stable-diffusion-xl-lightning',               type:'sdxl' },
+  { id:'cf-dreamshaper',   name:'DreamShaper 8 LCM',  description:'增强真实感微调模型',      provider:'cloudflare', key:'@cf/lykon/dreamshaper-8-lcm',                               type:'sdxl' },
 ];
 
 const POLLINATIONS_MODELS = [
-  { id: 'pol-flux',        name: 'FLUX',             description: '免费无需Key · 高质量',    provider: 'pollinations', key: 'flux' },
-  { id: 'pol-flux-realism',name: 'FLUX Realism',     description: '免费无需Key · 超写实',    provider: 'pollinations', key: 'flux-realism' },
-  { id: 'pol-turbo',       name: 'Turbo',             description: '免费无需Key · 极速',      provider: 'pollinations', key: 'turbo' },
-  { id: 'pol-flux-anime',  name: 'FLUX Anime',        description: '免费无需Key · 动漫风格',  provider: 'pollinations', key: 'flux-anime' },
-  { id: 'pol-flux-3d',     name: 'FLUX 3D',           description: '免费无需Key · 3D渲染',    provider: 'pollinations', key: 'flux-3d' },
+  { id:'pol-flux',         name:'FLUX',          description:'免费无需Key · 高质量',   provider:'pollinations', key:'flux' },
+  { id:'pol-flux-realism', name:'FLUX Realism',  description:'免费无需Key · 超写实',   provider:'pollinations', key:'flux-realism' },
+  { id:'pol-turbo',        name:'Turbo',          description:'免费无需Key · 极速',     provider:'pollinations', key:'turbo' },
+  { id:'pol-flux-anime',   name:'FLUX Anime',     description:'免费无需Key · 动漫风格', provider:'pollinations', key:'flux-anime' },
+  { id:'pol-flux-3d',      name:'FLUX 3D',        description:'免费无需Key · 3D渲染',   provider:'pollinations', key:'flux-3d' },
 ];
 
 const HF_MODELS = [
-  { id: 'hf-flux-dev',    name: 'FLUX.1-dev',    description: '需HF_TOKEN · 开源旗舰', provider: 'huggingface', key: 'black-forest-labs/FLUX.1-dev' },
-  { id: 'hf-flux-schnell',name: 'FLUX.1-schnell',description: '需HF_TOKEN · 极速FLUX', provider: 'huggingface', key: 'black-forest-labs/FLUX.1-schnell' },
-  { id: 'hf-sdxl',        name: 'SDXL',          description: '需HF_TOKEN · Stability AI', provider: 'huggingface', key: 'stabilityai/stable-diffusion-xl-base-1.0' },
+  { id:'hf-flux-dev',     name:'FLUX.1-dev',     description:'需HF_TOKEN · 开源旗舰',   provider:'huggingface', key:'black-forest-labs/FLUX.1-dev' },
+  { id:'hf-flux-schnell', name:'FLUX.1-schnell', description:'需HF_TOKEN · 极速FLUX',   provider:'huggingface', key:'black-forest-labs/FLUX.1-schnell' },
+  { id:'hf-sdxl',         name:'SDXL',           description:'需HF_TOKEN · Stability AI',provider:'huggingface', key:'stabilityai/stable-diffusion-xl-base-1.0' },
 ];
 
 const ALL_MODELS = [...CF_MODELS, ...POLLINATIONS_MODELS, ...HF_MODELS];
@@ -1025,7 +1139,7 @@ const RANDOM_PROMPTS = [
   'beautiful girl, sniper rifle, dark braided hair, armor, alpine, night, freckles, depth of field',
 ];
 
-// ── Prompt Enhancement via Llama ──────────────────────────────────────────────
+// ── Prompt Enhancement ────────────────────────────────────────────────────────
 async function enhancePrompt(originalPrompt, env) {
   try {
     const systemMsg = `You are an expert AI image generation prompt engineer.
@@ -1087,7 +1201,6 @@ export default {
       if (request.method === 'POST') {
         const data = await request.json();
 
-        // Auth
         const PASSWORDS = env.PASSWORD ? env.PASSWORD.split(',').map(p => p.trim()).filter(Boolean) : [];
         if (PASSWORDS.length > 0 && (!data.password || !PASSWORDS.includes(data.password))) {
           return new Response(JSON.stringify({ error: '请输入正确的访问密码' }), {
@@ -1108,7 +1221,6 @@ export default {
           });
         }
 
-        // Prompt enhancement (skip if user explicitly disabled or it's a login check)
         let finalPrompt = data.prompt;
         const shouldEnhance = data.enhance === true && data.prompt !== '__check__' && env.ENHANCE !== 'false';
         if (shouldEnhance) {
@@ -1117,10 +1229,9 @@ export default {
         data.originalPrompt = data.prompt;
         data.prompt = finalPrompt;
 
-        // Dispatch to provider with timeout + retry
         const generate = () => {
-          if (model.provider === 'cloudflare')   return handleCloudflare(model, data, env, corsHeaders);
-          if (model.provider === 'pollinations')  return handlePollinations(model, data, corsHeaders);
+          if (model.provider === 'cloudflare')  return handleCloudflare(model, data, env, corsHeaders);
+          if (model.provider === 'pollinations') return handlePollinations(model, data, corsHeaders);
           if (model.provider === 'huggingface') {
             if (!env.HF_TOKEN) return Promise.resolve(
               new Response(JSON.stringify({ error: '未配置 HF_TOKEN' }), {
@@ -1133,27 +1244,24 @@ export default {
 
         const imgResponse = await withTimeoutRetry(generate, 55000, 1);
 
-        // 图片生成成功后的后处理：入图库 + 上传图床
         if (imgResponse.ok) {
           const ct = imgResponse.headers.get('content-type') || 'image/png';
           if (ct.startsWith('image/')) {
             const imgBytes = await imgResponse.arrayBuffer();
 
-            // ① 发送给 Gallery Worker：AI 打标签 + 存档（同步等待，拿到图床 URL）
             let imageUrl = null;
             if (env.GALLERY_URL) {
               try {
-                // 先把图片传给 Gallery Worker 做 AI 分析 + 上传图床
                 const form = new FormData();
                 form.append('file', new Blob([imgBytes], { type: ct }), 'image.png');
-                form.append('prompt',          data.prompt);
-                form.append('originalPrompt',  data.originalPrompt || data.prompt);
-                form.append('model',           data.model || '');
-                form.append('width',           String(data.width  || 1024));
-                form.append('height',          String(data.height || 1024));
-                form.append('seed',            String(data.seed   || 0));
-                form.append('enhance',         String(data.enhance || false));
-                form.append('imageHost',       env.IMAGE_HOST || '');
+                form.append('prompt',         data.prompt);
+                form.append('originalPrompt', data.originalPrompt || data.prompt);
+                form.append('model',          data.model || '');
+                form.append('width',          String(data.width  || 1024));
+                form.append('height',         String(data.height || 1024));
+                form.append('seed',           String(data.seed   || 0));
+                form.append('enhance',        String(data.enhance || false));
+                form.append('imageHost',      env.IMAGE_HOST || '');
 
                 const gRes = await fetch(env.GALLERY_URL + '/gallery/ingest', {
                   method: 'POST',
@@ -1164,7 +1272,6 @@ export default {
                 if (gRes.ok) {
                   const gJson = await gRes.json();
                   imageUrl = gJson.imageUrl || null;
-                  console.log('[gallery] ingest ok, imageUrl:', imageUrl);
                 } else {
                   console.error('[gallery] ingest failed:', gRes.status);
                 }
@@ -1172,11 +1279,9 @@ export default {
                 console.error('[gallery] ingest error:', e.message);
               }
             } else if (env.IMAGE_HOST) {
-              // 没有 Gallery Worker，只上传图床
               imageUrl = await uploadToImageHost(imgBytes, ct, env.IMAGE_HOST);
             }
 
-            // ② 返回图片给前端，附带图床直链
             const newHeaders = new Headers({ 'content-type': ct });
             newHeaders.set('Access-Control-Allow-Origin', '*');
             newHeaders.set('Access-Control-Expose-Headers', 'x-image-url');
@@ -1204,36 +1309,25 @@ export default {
   },
 };
 
-
-// ── Upload to Telegraph-Image ─────────────────────────────────────────────────
+// ── Upload to Image Host ──────────────────────────────────────────────────────
 async function uploadToImageHost(imageBytes, contentType, hostUrl) {
   try {
     const form = new FormData();
     const blob = new Blob([imageBytes], { type: contentType || 'image/png' });
     form.append('file', blob, 'image.png');
-
-    const res = await fetch(hostUrl + '/upload', {
-      method: 'POST',
-      body: form,
-    });
-
+    const res = await fetch(hostUrl + '/upload', { method: 'POST', body: form });
     if (!res.ok) throw new Error(`图床返回 ${res.status}`);
-
     const json = await res.json();
-    // Telegraph-Image returns: [{"src": "/file/xxx.png"}]
     const src = Array.isArray(json) ? json[0]?.src : json?.src;
     if (!src) throw new Error('图床响应中无 src 字段');
-
-    // 拼接完整 URL
-    const fullUrl = src.startsWith('http') ? src : hostUrl + src;
-    return fullUrl;
+    return src.startsWith('http') ? src : hostUrl + src;
   } catch (e) {
     console.error('Upload to image host failed:', e);
     return null;
   }
 }
 
-// ── Timeout + Retry wrapper ───────────────────────────────────────────────────
+// ── Timeout + Retry ───────────────────────────────────────────────────────────
 async function withTimeoutRetry(fn, timeoutMs, retries) {
   for (let attempt = 0; attempt <= retries; attempt++) {
     const controller = new AbortController();
@@ -1260,24 +1354,14 @@ async function handleCloudflare(model, data, env, corsHeaders) {
   const type = model.type;
 
   if (type === 'flux-dev') {
-    // flux-1-dev-fp8: supports prompt + num_steps
-    inputs = {
-      prompt: data.prompt,
-      num_steps: Math.min(50, Math.max(4, data.num_steps || 28)),
-    };
+    inputs = { prompt: data.prompt, num_steps: Math.min(50, Math.max(4, data.num_steps || 28)) };
   } else if (type === 'flux-schnell') {
-    inputs = {
-      prompt: data.prompt,
-      steps: Math.min(8, Math.max(4, data.num_steps || 6)),
-    };
+    inputs = { prompt: data.prompt, steps: Math.min(8, Math.max(4, data.num_steps || 6)) };
   } else {
     inputs = {
-      prompt: data.prompt,
-      negative_prompt: data.negative_prompt || '',
-      height: data.height || 1024,
-      width:  data.width  || 1024,
-      num_steps: data.num_steps || 20,
-      strength: 0.1,
+      prompt: data.prompt, negative_prompt: data.negative_prompt || '',
+      height: data.height || 1024, width: data.width || 1024,
+      num_steps: data.num_steps || 20, strength: 0.1,
       guidance: data.guidance || 7.5,
       seed: data.seed || Math.floor(Math.random() * 1048576),
     };
@@ -1285,8 +1369,6 @@ async function handleCloudflare(model, data, env, corsHeaders) {
 
   try {
     const response = await env.AI.run(model.key, inputs);
-
-    // flux-dev and flux-schnell return base64 JSON
     if (type === 'flux-dev' || type === 'flux-schnell') {
       const json = typeof response === 'object' ? response : JSON.parse(response);
       if (!json.image) throw new Error('响应中无图像数据');
@@ -1295,7 +1377,6 @@ async function handleCloudflare(model, data, env, corsHeaders) {
       for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
       return new Response(bytes, { headers: { ...corsHeaders, 'content-type': 'image/png' } });
     }
-
     return new Response(response, { headers: { ...corsHeaders, 'content-type': 'image/png' } });
   } catch (e) {
     return new Response(JSON.stringify({ error: 'Cloudflare AI 生成失败', details: e.message }), {
@@ -1311,10 +1392,8 @@ async function handlePollinations(model, data, corsHeaders) {
     const url  = `https://image.pollinations.ai/prompt/${encodeURIComponent(data.prompt)}`
       + `?model=${model.key}&width=${data.width||1024}&height=${data.height||1024}`
       + `&seed=${seed}&nologo=true&enhance=false`;
-
     const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
     if (!res.ok) throw new Error(`Pollinations 返回 ${res.status}`);
-
     return new Response(await res.arrayBuffer(), {
       headers: { ...corsHeaders, 'content-type': res.headers.get('content-type') || 'image/jpeg' },
     });
@@ -1335,15 +1414,13 @@ async function handleHuggingFace(model, data, token, corsHeaders) {
         inputs: data.prompt,
         parameters: {
           negative_prompt: data.negative_prompt || '',
-          width:  data.width  || 1024,
-          height: data.height || 1024,
+          width: data.width || 1024, height: data.height || 1024,
           num_inference_steps: data.num_steps || 20,
           guidance_scale: data.guidance || 7.5,
           seed: data.seed || Math.floor(Math.random() * 4294967295),
         },
       }),
     });
-
     if (!res.ok) {
       const ct = res.headers.get('content-type') || '';
       if (ct.includes('json')) {
@@ -1357,7 +1434,6 @@ async function handleHuggingFace(model, data, token, corsHeaders) {
       }
       throw new Error(`HF 返回 ${res.status}`);
     }
-
     return new Response(await res.arrayBuffer(), {
       headers: { ...corsHeaders, 'content-type': res.headers.get('content-type') || 'image/png' },
     });
