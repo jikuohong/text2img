@@ -1,16 +1,10 @@
 /**
- * Cloudflare Worker - Multi-provider AI Image Generation
+ * Cloudflare Worker - Multi-provider AI Image Generation v2
  *
- * Deploy: https://dash.cloudflare.com → Workers → Create → Paste this file
- *
- * Environment Variables (set in Worker Settings → Variables):
- *   PASSWORD   - 访问密码，多个用逗号分隔，留空则不需要密码
- *   HF_TOKEN   - HuggingFace API Token（可选，不填则隐藏 HF 模型）
- *   ENHANCE    - 设为 "false" 可全局关闭提示词增强功能
- *
- * Sidebar Links (search for YOUR_GALLERY_URL / YOUR_IMAGE_HOST_URL to replace):
- *   YOUR_GALLERY_URL      - 替换为你的图库地址
- *   YOUR_IMAGE_HOST_URL   - 替换为你的图床地址
+ * Environment Variables:
+ *   PASSWORD   - Access password (comma-separated), leave empty to disable
+ *   HF_TOKEN   - Hugging Face API token (optional)
+ *   ENHANCE    - Set to "false" to disable prompt enhancement globally
  */
 
 const HTML = `<!DOCTYPE html>
@@ -590,11 +584,11 @@ html.dark .lerr{background:rgba(154,52,18,.2);color:#fca882;border-color:rgba(15
     <div class="sb-section" style="border-top:1px solid var(--border);margin-top:8px">
       <div class="sb-section-lbl">工具链接</div>
       <nav class="sb-nav" style="padding:0">
-        <a class="ni" href="YOUR_GALLERY_URL" target="_blank">
+        <a class="ni" href="https://gallery.kont.us.ci" target="_blank">
           <span class="ni-ic"><i class="fa-solid fa-images"></i></span>AI 图库
           <span style="margin-left:auto;font-size:9px;opacity:.45"><i class="fa-solid fa-arrow-up-right-from-square"></i></span>
         </a>
-        <a class="ni" href="YOUR_IMAGE_HOST_URL" target="_blank">
+        <a class="ni" href="https://image.kont.us.ci" target="_blank">
           <span class="ni-ic"><i class="fa-solid fa-photo-film"></i></span>图床
           <span style="margin-left:auto;font-size:9px;opacity:.45"><i class="fa-solid fa-arrow-up-right-from-square"></i></span>
         </a>
@@ -667,11 +661,11 @@ html.dark .lerr{background:rgba(154,52,18,.2);color:#fca882;border-color:rgba(15
     <div class="sb-section" style="border-top:1px solid var(--border);margin-top:8px">
       <div class="sb-section-lbl">工具链接</div>
       <nav class="sb-nav" style="padding:0">
-        <a class="ni" href="YOUR_GALLERY_URL" target="_blank">
+        <a class="ni" href="https://gallery.kont.us.ci" target="_blank">
           <span class="ni-ic"><i class="fa-solid fa-images"></i></span>AI 图库
           <span style="margin-left:auto;font-size:9px;opacity:.45"><i class="fa-solid fa-arrow-up-right-from-square"></i></span>
         </a>
-        <a class="ni" href="YOUR_IMAGE_HOST_URL" target="_blank">
+        <a class="ni" href="https://image.kont.us.ci" target="_blank">
           <span class="ni-ic"><i class="fa-solid fa-photo-film"></i></span>图床
           <span style="margin-left:auto;font-size:9px;opacity:.45"><i class="fa-solid fa-arrow-up-right-from-square"></i></span>
         </a>
