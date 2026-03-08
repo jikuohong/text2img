@@ -449,15 +449,16 @@ html.dark .lerr{background:rgba(154,52,18,.2);color:#fca882;border-color:rgba(15
         <span class="ni-ic"><i class="fa-solid fa-clock-rotate-left"></i></span>历史记录
         <span id="histCount" style="margin-left:auto;font-size:10px;background:var(--accent-bg);color:var(--accent);padding:1px 7px;border-radius:10px;border:1px solid var(--accent-ring);display:none">0</span>
       </button>
-      <button class="ni" style="opacity:.38;cursor:not-allowed" disabled>
+      <button class="ni" id="img2imgNavBtn">
         <span class="ni-ic"><i class="fa-solid fa-image"></i></span>图生图
-        <span style="margin-left:auto;font-size:10px;background:var(--surface2);color:var(--muted);padding:1px 7px;border-radius:10px;border:1px solid var(--border)">Soon</span>
       </button>
     </nav>
   </div>
 
   <!-- Scrollable settings area -->
   <div class="sb-scroll">
+  <!-- 文生图设置 -->
+  <div id="t2iSettings">
 
     <!-- Prompt -->
     <div class="sb-section">
@@ -594,17 +595,106 @@ html.dark .lerr{background:rgba(154,52,18,.2);color:#fca882;border-color:rgba(15
       </nav>
     </div>
 
-  </div>
+  </div><!-- end t2iSettings -->
+
+  <!-- 图生图设置 -->
+  <div id="i2iSettings" style="display:none">
+
+    <div class="sb-section">
+      <div class="sb-section-lbl">参考图片</div>
+      <div id="i2iDropZone" style="
+        border:2px dashed var(--border2);border-radius:var(--r);
+        padding:20px 12px;text-align:center;cursor:pointer;
+        transition:border-color var(--t),background var(--t);
+        background:var(--surface2);position:relative;
+      ">
+        <input type="file" id="i2iFile" accept="image/*" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%">
+        <div id="i2iPH">
+          <i class="fa-solid fa-cloud-arrow-up" style="font-size:22px;color:var(--muted);margin-bottom:8px;display:block"></i>
+          <div style="font-size:12px;color:var(--muted);font-weight:500">点击或拖拽上传图片</div>
+          <div style="font-size:10px;color:var(--muted2);margin-top:3px">支持 JPG / PNG / WebP</div>
+        </div>
+        <img id="i2iPreview" style="display:none;width:100%;border-radius:var(--r-sm);max-height:160px;object-fit:contain">
+        <button id="i2iClear" style="display:none;position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.5);color:#fff;border:none;cursor:pointer;font-size:11px;align-items:center;justify-content:center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-section-lbl">提示词</div>
+      <div class="fr">
+        <label>描述方向（可选）</label>
+        <textarea id="i2iPrompt" rows="3" placeholder="描述想要的风格或内容变化… 留空则保持原图风格"></textarea>
+      </div>
+      <div class="fr" style="margin-bottom:0">
+        <label>反向提示词</label>
+        <textarea id="i2iNeg" rows="2" placeholder="描述要排除的内容…"></textarea>
+      </div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-section-lbl">参数</div>
+      <div class="fr">
+        <label>模型 <span style="font-weight:400;text-transform:none;color:var(--muted2)">· FLUX 不支持图生图</span></label>
+        <div class="selwrap">
+          <select id="i2iModel"></select>
+        </div>
+      </div>
+      <div class="fr">
+        <div class="lr"><label>变化强度</label><span class="sv" id="strV">0.75</span></div>
+        <input type="range" id="i2iStrength" min="0.1" max="1" step="0.05" value="0.75">
+        <div style="font-size:10px;color:var(--muted2);margin-top:4px">越低越接近原图，越高变化越大</div>
+      </div>
+      <div class="fr">
+        <div class="lr"><label>迭代步数</label><span class="sv" id="i2iStV">20</span></div>
+        <input type="range" id="i2iSteps" min="1" max="50" step="1" value="20">
+      </div>
+      <div class="fr" style="margin-bottom:0">
+        <div class="lr"><label>引导系数</label><span class="sv" id="i2iGuV">7.50</span></div>
+        <input type="range" id="i2iGuidance" min="0" max="30" step="0.5" value="7.5">
+      </div>
+    </div>
+
+    <!-- spacer + links -->
+    <div style="flex:1"></div>
+    <div class="sb-section" style="border-top:1px solid var(--border);margin-top:8px">
+      <div class="sb-section-lbl">工具链接</div>
+      <nav class="sb-nav" style="padding:0">
+        <a class="ni" href="https://your-gallery.workers.dev" target="_blank">
+          <span class="ni-ic"><i class="fa-solid fa-images"></i></span>AI 图库
+          <span style="margin-left:auto;font-size:9px;opacity:.45"><i class="fa-solid fa-arrow-up-right-from-square"></i></span>
+        </a>
+        <a class="ni" href="https://your-image-host.com" target="_blank">
+          <span class="ni-ic"><i class="fa-solid fa-photo-film"></i></span>图床
+          <span style="margin-left:auto;font-size:9px;opacity:.45"><i class="fa-solid fa-arrow-up-right-from-square"></i></span>
+        </a>
+      </nav>
+    </div>
+
+  </div><!-- end i2iSettings -->
 
   <!-- Fixed footer: generate + theme/logout -->
   <div class="sb-foot">
-    <button class="btn bp bfw" id="genBtn" style="height:42px;font-size:13.5px;border-radius:var(--r);margin-bottom:10px">
-      <i class="fa-solid fa-wand-magic-sparkles"></i> 生成图像
-    </button>
-    <div style="display:flex;gap:6px;align-items:center">
-      <button class="btn bg bsm" id="randomBtn" style="flex:1;justify-content:center"><i class="fa-solid fa-dice"></i> 随机提示词</button>
-      <button class="ib" id="themeToggle" title="切换主题"><i class="fa-solid fa-moon" id="themeIcon"></i></button>
-      <button class="ib" id="logoutBtn" title="退出登录"><i class="fa-solid fa-right-from-bracket"></i></button>
+    <div id="t2iFooter">
+      <button class="btn bp bfw" id="genBtn" style="height:42px;font-size:13.5px;border-radius:var(--r);margin-bottom:10px">
+        <i class="fa-solid fa-wand-magic-sparkles"></i> 生成图像
+      </button>
+      <div style="display:flex;gap:6px;align-items:center">
+        <button class="btn bg bsm" id="randomBtn" style="flex:1;justify-content:center"><i class="fa-solid fa-dice"></i> 随机提示词</button>
+        <button class="ib" id="themeToggle" title="切换主题"><i class="fa-solid fa-moon" id="themeIcon"></i></button>
+        <button class="ib" id="logoutBtn" title="退出登录"><i class="fa-solid fa-right-from-bracket"></i></button>
+      </div>
+    </div>
+    <div id="i2iFooter" style="display:none">
+      <button class="btn bp bfw" id="i2iGenBtn" style="height:42px;font-size:13.5px;border-radius:var(--r);margin-bottom:10px">
+        <i class="fa-solid fa-wand-magic-sparkles"></i> 开始图生图
+      </button>
+      <div style="display:flex;gap:6px;align-items:center">
+        <div style="flex:1;font-size:11px;color:var(--muted)">基于参考图生成</div>
+        <button class="ib" id="themeToggle2" title="切换主题"><i class="fa-solid fa-moon" id="themeIcon2"></i></button>
+        <button class="ib" id="logoutBtn2" title="退出登录"><i class="fa-solid fa-right-from-bracket"></i></button>
+      </div>
     </div>
   </div>
 
@@ -613,7 +703,7 @@ html.dark .lerr{background:rgba(154,52,18,.2);color:#fca882;border-color:rgba(15
 <!-- MAIN -->
 <div id="main">
   <div class="topbar">
-    <div class="topbar-title">
+    <div class="topbar-title" id="topbarTitle">
       <i class="fa-solid fa-wand-magic-sparkles" style="color:var(--accent);margin-right:8px;font-size:13px"></i>文生图
     </div>
     <div class="sdot"></div>
@@ -712,7 +802,42 @@ html.dark .lerr{background:rgba(154,52,18,.2);color:#fca882;border-color:rgba(15
       </div>
     </div>
   </div>
-</div>
+
+  <!-- 图生图结果区 -->
+  <div id="i2iView" style="display:none">
+    <div class="pcont">
+      <div class="card">
+        <div class="ch">
+          <div class="ch-ic"><i class="fa-solid fa-image"></i></div>
+          <span class="ct">图生图结果</span>
+          <div style="display:flex;gap:6px;margin-left:auto">
+            <button class="btn bg bsm hidden" id="i2iDlBtn"><i class="fa-solid fa-download"></i> 下载</button>
+          </div>
+        </div>
+        <div class="cb">
+          <div id="i2iImgArea" style="aspect-ratio:1;background:var(--surface2);border-radius:var(--r);border:1.5px dashed var(--border2);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;">
+            <div id="i2iImgPH" style="text-align:center;color:var(--muted)">
+              <i class="fa-regular fa-image" style="font-size:32px;margin-bottom:10px;display:block;opacity:.25"></i>
+              <p style="font-size:13px;font-weight:500">上传参考图后点击「开始图生图」</p>
+            </div>
+            <img id="i2iResultImg" alt="图生图结果" style="width:100%;height:100%;object-fit:contain;border-radius:6px;display:none">
+            <div class="ldov" id="i2iLdov">
+              <div class="spn"></div>
+              <p>图生图生成中…</p>
+              <p class="sub">这可能需要几十秒</p>
+              <div class="timer" id="i2iTimer">0s</div>
+            </div>
+          </div>
+          <div class="img-meta hidden" id="i2iMeta">
+            <span class="mb"><i class="fa-regular fa-clock"></i><span id="i2iGenTime">-</span></span>
+            <span class="mb"><i class="fa-solid fa-microchip"></i><span id="i2iUsedMdl">-</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><!-- end i2iView -->
+
+</div><!-- end main -->
 
 <div id="toast"></div>
 
@@ -720,6 +845,8 @@ html.dark .lerr{background:rgba(154,52,18,.2);color:#fca882;border-color:rgba(15
 (function(){
 'use strict';
 var models=[],curParams=null,enhOn=true,genTimer=null;
+var i2iImageB64=null,i2iTimer=null;
+var activeTab='t2i'; // 't2i' | 'i2i'
 
 // ── Theme ──────────────────────────────────────────────────────────────────
 var html=document.documentElement;
@@ -767,6 +894,39 @@ document.getElementById('logoutBtn').addEventListener('click',function(){
   loginModal.classList.remove('hidden');
   lpEl.value='';lerr.classList.remove('show');
 });
+document.getElementById('logoutBtn2').addEventListener('click',function(){
+  document.getElementById('logoutBtn').click();
+});
+document.getElementById('themeToggle2').addEventListener('click',function(){
+  document.getElementById('themeToggle').click();
+  var d=html.classList.contains('dark');
+  document.getElementById('themeIcon2').className=d?'fa-solid fa-sun':'fa-solid fa-moon';
+});
+
+// ── Tab Switching ──────────────────────────────────────────────────────────
+var t2iNavBtn=document.querySelector('.ni.active');
+var img2imgNavBtn=document.getElementById('img2imgNavBtn');
+function switchTab(tab){
+  activeTab=tab;
+  var ist2i=tab==='t2i';
+  document.getElementById('t2iSettings').style.display=ist2i?'':'none';
+  document.getElementById('i2iSettings').style.display=ist2i?'none':'';
+  document.getElementById('t2iFooter').style.display=ist2i?'':'none';
+  document.getElementById('i2iFooter').style.display=ist2i?'none':'';
+  // main views
+  document.querySelector('#main .pcont').style.display=ist2i?'':'none';
+  document.getElementById('i2iView').style.display=ist2i?'none':'';
+  // topbar
+  var tb=document.getElementById('topbarTitle');
+  tb.innerHTML=ist2i
+    ?'<i class="fa-solid fa-wand-magic-sparkles" style="color:var(--accent);margin-right:8px;font-size:13px"></i>文生图'
+    :'<i class="fa-solid fa-image" style="color:var(--accent);margin-right:8px;font-size:13px"></i>图生图';
+  // nav active state
+  t2iNavBtn.classList.toggle('active',ist2i);
+  img2imgNavBtn.classList.toggle('active',!ist2i);
+}
+t2iNavBtn.addEventListener('click',function(){switchTab('t2i');});
+img2imgNavBtn.addEventListener('click',function(){switchTab('i2i');});
 
 // ── Lightbox ───────────────────────────────────────────────────────────────
 var lb=document.getElementById('lb');
@@ -853,22 +1013,46 @@ async function loadModels(){
   try{
     var r=await fetch('/api/models');models=await r.json();
     var sel=document.getElementById('model');sel.innerHTML='';
-    var groups={cloudflare:[],pollinations:[],huggingface:[]};
-    models.forEach(function(m){(groups[m.provider]||(groups[m.provider]=[])).push(m);});
-    var glbls={cloudflare:'☁️ Cloudflare Workers AI',pollinations:'🌸 Pollinations AI（免费无需Key）',huggingface:'🤗 HuggingFace Inference'};
-    Object.keys(groups).forEach(function(pv){
-      if(!groups[pv]||!groups[pv].length)return;
-      var og=document.createElement('optgroup');og.label=glbls[pv]||pv;
-      groups[pv].forEach(function(m){
+    // 文生图下拉（排除专用图生图模型）
+    var t2iModels=models.filter(function(m){return !m.i2iOnly;});
+    var groups={};
+    t2iModels.forEach(function(m){(groups[m.provider]||(groups[m.provider]=[])).push(m);});
+    Object.keys(groups).forEach(function(prov){
+      var og=document.createElement('optgroup');
+      var cfg=PV_CFG[prov]||{label:prov};
+      og.label=cfg.label||prov;
+      groups[prov].forEach(function(m){
         var o=document.createElement('option');o.value=m.id;
         o.textContent=m.name+' — '+m.description;og.appendChild(o);
       });
       sel.appendChild(og);
     });
-    var defM=models.find(function(m){return m.id==='cf-flux-schnell';});
+    // 默认选 cf-flux-schnell
+    var defM=t2iModels.find(function(m){return m.id==='cf-flux-schnell';});
     if(defM)sel.value=defM.id;
     updatePvBadge(sel.value);
     sel.addEventListener('change',function(){updatePvBadge(sel.value);});
+    // 图生图模型：仅支持传图的 CF 模型（排除 FLUX 系列，它们不支持图生图）
+    var i2iSel=document.getElementById('i2iModel');i2iSel.innerHTML='';
+    var i2iModels=models.filter(function(m){
+      return m.type==='sdxl'||m.type==='img2img';
+    });
+    // 按 provider 分组
+    var i2iGroups={};
+    i2iModels.forEach(function(m){(i2iGroups[m.provider]||(i2iGroups[m.provider]=[])).push(m);});
+    Object.keys(i2iGroups).forEach(function(prov){
+      var og=document.createElement('optgroup');
+      var cfg=PV_CFG[prov]||{label:prov};
+      og.label=cfg.label||prov;
+      i2iGroups[prov].forEach(function(m){
+        var o=document.createElement('option');o.value=m.id;
+        o.textContent=m.name+' — '+m.description;og.appendChild(o);
+      });
+      i2iSel.appendChild(og);
+    });
+    // 默认选专用图生图模型
+    var defI2I=i2iModels.find(function(m){return m.id==='cf-sd15-img2img';});
+    if(defI2I)i2iSel.value=defI2I.id;
   }catch(e){toast('加载模型失败','err');}
 }
 loadModels();
@@ -891,6 +1075,133 @@ document.getElementById('randomBtn').addEventListener('click',async function(){
   }finally{
     btn.disabled=false;
     btn.innerHTML=orig;
+  }
+});
+
+// ── Img2Img ────────────────────────────────────────────────────────────────
+// 滑块
+document.getElementById('i2iStrength').addEventListener('input',function(){
+  document.getElementById('strV').textContent=parseFloat(this.value).toFixed(2);
+});
+document.getElementById('i2iSteps').addEventListener('input',function(){
+  document.getElementById('i2iStV').textContent=this.value;
+});
+document.getElementById('i2iGuidance').addEventListener('input',function(){
+  document.getElementById('i2iGuV').textContent=parseFloat(this.value).toFixed(2);
+});
+
+// 上传图片
+function setI2iImage(file){
+  if(!file||!file.type.startsWith('image/'))return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    i2iImageB64=e.target.result; // data:image/...;base64,...
+    document.getElementById('i2iPH').style.display='none';
+    var prev=document.getElementById('i2iPreview');
+    prev.src=i2iImageB64;prev.style.display='block';
+    var clr=document.getElementById('i2iClear');clr.style.display='flex';
+    // 根据图片宽高设置 aspect-ratio
+    var img=new Image();
+    img.onload=function(){
+      document.getElementById('i2iImgArea').style.aspectRatio=(img.width/img.height).toFixed(4);
+    };
+    img.src=i2iImageB64;
+  };
+  reader.readAsDataURL(file);
+}
+document.getElementById('i2iFile').addEventListener('change',function(){
+  if(this.files[0])setI2iImage(this.files[0]);
+});
+document.getElementById('i2iClear').addEventListener('click',function(e){
+  e.stopPropagation();
+  i2iImageB64=null;
+  document.getElementById('i2iPreview').style.display='none';
+  document.getElementById('i2iPH').style.display='';
+  this.style.display='none';
+  document.getElementById('i2iFile').value='';
+  document.getElementById('i2iImgArea').style.aspectRatio='1';
+});
+// 拖拽
+var dz=document.getElementById('i2iDropZone');
+dz.addEventListener('dragover',function(e){e.preventDefault();this.style.borderColor='var(--accent)';});
+dz.addEventListener('dragleave',function(){this.style.borderColor='';});
+dz.addEventListener('drop',function(e){
+  e.preventDefault();this.style.borderColor='';
+  var f=e.dataTransfer.files[0];if(f)setI2iImage(f);
+});
+
+// 生成
+var i2iTimerInterval=null;
+document.getElementById('i2iGenBtn').addEventListener('click',async function(){
+  if(!i2iImageB64){toast('请先上传参考图片','warn');return;}
+  var modelId=document.getElementById('i2iModel').value;
+  if(!modelId){toast('没有可用的 SD 模型','err');return;}
+  var prompt=document.getElementById('i2iPrompt').value||'';
+  var neg=document.getElementById('i2iNeg').value||'';
+  var strength=parseFloat(document.getElementById('i2iStrength').value)||0.75;
+  var steps=parseInt(document.getElementById('i2iSteps').value)||20;
+  var guidance=parseFloat(document.getElementById('i2iGuidance').value)||7.5;
+
+  var ldov=document.getElementById('i2iLdov');
+  var resultImg=document.getElementById('i2iResultImg');
+  var ph=document.getElementById('i2iImgPH');
+  var timerEl=document.getElementById('i2iTimer');
+  var btn=this;
+
+  btn.disabled=true;
+  resultImg.style.display='none';ph.style.display='none';
+  ldov.classList.add('show');
+  document.getElementById('i2iMeta').classList.add('hidden');
+
+  var t0=performance.now();
+  clearInterval(i2iTimerInterval);
+  i2iTimerInterval=setInterval(function(){timerEl.textContent=((performance.now()-t0)/1000).toFixed(1)+'s';},200);
+
+  try{
+    var res=await fetch('/',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'image/*'},
+      body:JSON.stringify({
+        password:sessionStorage.getItem('apw')||'',
+        prompt:prompt,
+        negative_prompt:neg,
+        model:modelId,
+        strength:strength,
+        num_steps:steps,
+        guidance:guidance,
+        seed:Math.floor(Math.random()*4294967295),
+        image_b64:i2iImageB64.split(',')[1], // 去掉 data:...;base64, 前缀
+      }),
+    });
+    clearInterval(i2iTimerInterval);
+    if(!res.ok){
+      var err=await res.json().catch(function(){return {error:'生成失败'};});
+      toast(err.error||'图生图失败','err');
+    } else {
+      var blob=await res.blob();
+      var b64=await blobToB64(blob);
+      resultImg.src=b64;resultImg.style.display='block';
+      var elapsed=((performance.now()-t0)/1000).toFixed(2);
+      var mdl=models.find(function(m){return m.id===modelId;});
+      document.getElementById('i2iGenTime').textContent=elapsed+'s';
+      document.getElementById('i2iUsedMdl').textContent=mdl?mdl.name:modelId;
+      document.getElementById('i2iMeta').classList.remove('hidden');
+      // 下载
+      var dlBtn=document.getElementById('i2iDlBtn');
+      dlBtn.classList.remove('hidden');
+      dlBtn.onclick=function(){
+        var a=document.createElement('a');a.href=b64;
+        a.download='i2i-'+Date.now()+'.png';a.click();
+      };
+      toast('图生图完成','ok');
+    }
+  }catch(e){
+    clearInterval(i2iTimerInterval);
+    toast('请求失败：'+e.message,'err');
+  }finally{
+    clearInterval(i2iTimerInterval);
+    ldov.classList.remove('show');
+    btn.disabled=false;
   }
 });
 
@@ -968,7 +1279,7 @@ document.getElementById('genBtn').addEventListener('click',generate);
 document.getElementById('reuseBtn').addEventListener('click',function(){if(curParams)generate(true);});
 
 // 自动降级模型链：主模型失败后按顺序尝试
-var FALLBACK_CHAIN=['pol-flux','pol-turbo','pol-flux-realism'];
+var FALLBACK_CHAIN=['pol-flux','pol-flux-realism','pol-turbo','pol-any-dark','pol-flux-anime','pol-flux-3d','pol-konyconi','pol-flux-cablyai'];
 
 // 发起单次请求（带超时），成功返回 {res, blob, b64}，失败抛出错误
 async function tryFetch(params, timeoutMs){
@@ -1214,19 +1525,23 @@ function renderParams(params,enhPrompt,origPrompt){
 
 // ── Models ────────────────────────────────────────────────────────────────────
 const CF_MODELS = [
-  { id:'cf-flux-dev',      name:'FLUX.1-dev FP8',    description:'旗舰质量 · 细节极佳',    provider:'cloudflare', key:'@cf/black-forest-labs/flux-1-dev-fp8',                      type:'flux-dev' },
-  { id:'cf-flux-schnell',  name:'FLUX.1 Schnell',     description:'极速生成 · 质量均衡',    provider:'cloudflare', key:'@cf/black-forest-labs/flux-1-schnell',                       type:'flux-schnell' },
-  { id:'cf-sdxl',          name:'Stable Diffusion XL',description:'SDXL 高质量通用',        provider:'cloudflare', key:'@cf/stabilityai/stable-diffusion-xl-base-1.0',              type:'sdxl' },
-  { id:'cf-sdxl-lightning',name:'SDXL Lightning',     description:'极速 SDXL 版本',          provider:'cloudflare', key:'@cf/bytedance/stable-diffusion-xl-lightning',               type:'sdxl' },
-  { id:'cf-dreamshaper',   name:'DreamShaper 8 LCM',  description:'增强真实感微调模型',      provider:'cloudflare', key:'@cf/lykon/dreamshaper-8-lcm',                               type:'sdxl' },
+  { id:'cf-flux-dev',      name:'FLUX.1-dev FP8',      description:'旗舰质量 · 细节极佳',      provider:'cloudflare', key:'@cf/black-forest-labs/flux-1-dev-fp8',               type:'flux-dev' },
+  { id:'cf-flux-schnell',  name:'FLUX.1 Schnell',       description:'极速生成 · 质量均衡',      provider:'cloudflare', key:'@cf/black-forest-labs/flux-1-schnell',               type:'flux-schnell' },
+  { id:'cf-sdxl',          name:'Stable Diffusion XL',  description:'SDXL 高质量通用',          provider:'cloudflare', key:'@cf/stabilityai/stable-diffusion-xl-base-1.0',      type:'sdxl' },
+  { id:'cf-sdxl-lightning',name:'SDXL Lightning',       description:'极速 SDXL 版本',            provider:'cloudflare', key:'@cf/bytedance/stable-diffusion-xl-lightning',        type:'sdxl' },
+  { id:'cf-dreamshaper',   name:'DreamShaper 8 LCM',    description:'增强真实感微调模型',        provider:'cloudflare', key:'@cf/lykon/dreamshaper-8-lcm',                       type:'sdxl' },
+  { id:'cf-sd15-img2img',  name:'SD 1.5 图生图',         description:'专用图生图模型 · 最稳定',  provider:'cloudflare', key:'@cf/runwayml/stable-diffusion-v1-5-img2img',         type:'img2img', i2iOnly:true },
 ];
 
 const POLLINATIONS_MODELS = [
-  { id:'pol-flux',         name:'FLUX',          description:'免费无需Key · 高质量',   provider:'pollinations', key:'flux' },
-  { id:'pol-flux-realism', name:'FLUX Realism',  description:'免费无需Key · 超写实',   provider:'pollinations', key:'flux-realism' },
-  { id:'pol-turbo',        name:'Turbo',          description:'免费无需Key · 极速',     provider:'pollinations', key:'turbo' },
-  { id:'pol-flux-anime',   name:'FLUX Anime',     description:'免费无需Key · 动漫风格', provider:'pollinations', key:'flux-anime' },
-  { id:'pol-flux-3d',      name:'FLUX 3D',        description:'免费无需Key · 3D渲染',   provider:'pollinations', key:'flux-3d' },
+  { id:'pol-flux',          name:'FLUX',              description:'免费 · 高质量旗舰',     provider:'pollinations', key:'flux' },
+  { id:'pol-flux-realism',  name:'FLUX Realism',      description:'免费 · 超写实人像',     provider:'pollinations', key:'flux-realism' },
+  { id:'pol-flux-anime',    name:'FLUX Anime',         description:'免费 · 动漫插画风',     provider:'pollinations', key:'flux-anime' },
+  { id:'pol-flux-3d',       name:'FLUX 3D',            description:'免费 · 3D渲染质感',     provider:'pollinations', key:'flux-3d' },
+  { id:'pol-turbo',         name:'SDXL Turbo',         description:'免费 · 极速生成',       provider:'pollinations', key:'turbo' },
+  { id:'pol-any-dark',      name:'Any Dark',           description:'免费 · 暗黑艺术风格',   provider:'pollinations', key:'any-dark' },
+  { id:'pol-konyconi',      name:'Kony Coni',          description:'免费 · 二次元插画',     provider:'pollinations', key:'konyconi' },
+  { id:'pol-flux-cablyai',  name:'FLUX CablyAI',       description:'免费 · 写实增强版',     provider:'pollinations', key:'flux-cablyai' },
 ];
 
 const HF_MODELS = [
@@ -1294,14 +1609,54 @@ export default {
 
       if (path === '/api/prompts') {
         try {
+          const categories = [
+            '赛博朋克城市、霓虹灯、雨夜',
+            '奇幻生物、神话怪兽',
+            '人物肖像、独特风格',
+            '抽象艺术、几何、色彩',
+            '美食摄影、诱人料理',
+            '水下场景、海洋生物',
+            '太空探索、科幻星球',
+            '温馨室内、暖光氛围',
+            '壮阔山河、自然风光',
+            '街头摄影、城市生活',
+            '蒸汽朋克机械、复古工业',
+            '恐怖氛围、黑暗压抑',
+            '可爱动物、治愈系',
+            '废墟遗迹、考古探险',
+            '未来机器人、科技感',
+            '植物插画、花卉写实',
+            '动作场面、力量爆发',
+            '极简构图、留白设计',
+            '超现实主义、荒诞奇异',
+            '东方水墨、写意风格',
+            '末日废土、文明崩塌',
+            '热带雨林、浓郁色彩',
+            '黑色电影、阴影对比',
+            '二次元chibi、Q版人物',
+            '超写实油画、质感细腻',
+            '大雪暴风、极寒荒野',
+            '沙漠戈壁、烈日炎炎',
+            '老上海风情、民国旗袍',
+            '像素艺术、复古游戏',
+            '显微镜下、微观世界',
+          ];
+          const pick = categories[Math.floor(Math.random() * categories.length)];
           const resp = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
             messages: [
-              { role: 'system', content: '你是一个创意词语生成器。每次输出一组2~5个随机词语，用于图像生成的灵感，词语之间用逗号分隔。可以是中文或英文，主题随机，天马行空，风格各异。只输出词语本身，不要任何解释或标点以外的内容。' },
-              { role: 'user', content: '生成一组随机词语' },
+              { role: 'system', content: `你是一个图像生成提示词生成器。
+根据给定主题，输出一条5-12个词的提示词，用于AI图像生成。
+要求：
+- 必须用中文输出，可以夹杂少量英文专业词汇（如风格词、摄影术语）
+- 要具体生动，避免"美丽""惊艳"等空泛形容词
+- 可以包含风格、光线、构图、情绪等要素
+- 只输出提示词本身，不加引号、不加解释
+- 禁止出现：星空、古堡、樱花、唯美、梦幻等滥用词` },
+              { role: 'user', content: `主题：${pick}` },
             ],
-            max_tokens: 60,
+            max_tokens: 80,
           });
-          const text = (resp?.response || '').trim();
+          const text = (resp?.response || '').trim().replace(/^["']|["']$/g, '');
           return new Response(JSON.stringify({ prompt: text }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           });
@@ -1475,10 +1830,18 @@ async function handleCloudflare(model, data, env, corsHeaders) {
     inputs = {
       prompt: data.prompt, negative_prompt: data.negative_prompt || '',
       height: data.height || 1024, width: data.width || 1024,
-      num_steps: data.num_steps || 20, strength: 0.1,
+      num_steps: data.num_steps || 20, strength: data.strength || 0.1,
       guidance: data.guidance || 7.5,
       seed: data.seed || Math.floor(Math.random() * 1048576),
     };
+    // 图生图：传入参考图
+    if (data.image_b64) {
+      const binary = atob(data.image_b64);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      inputs.image = [...bytes];
+      inputs.strength = data.strength || 0.75;
+    }
   }
 
   try {
