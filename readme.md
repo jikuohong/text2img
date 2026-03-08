@@ -1,167 +1,184 @@
-# AI 文生图 Text2Img Worker
+# 文生图 Worker · AI Image Generation
 
-基于 Cloudflare Workers 的多模型 AI 文生图服务，支持提示词增强、自动上传图床、联动图库，单文件部署。
-
----
-
-## 部署
-
-### 1. 创建 Worker
-
-在 Cloudflare Dashboard 中创建新 Worker，命名为 `text2img`（或任意名称）。
-
-### 2. 绑定配置
-
-进入 Worker → **绑定** → 添加以下绑定：
-
-| 类型 | 变量名 | 说明 |
-|------|--------|------|
-| Workers AI | `AI` | 用于提示词增强（Llama）和图片生成（CF 模型） |
-
-### 3. 环境变量
-
-进入 Worker → **设置** → **变量和机密**：
-
-| 变量名 | 示例值 | 说明 |
-|--------|--------|------|
-| `PASSWORD` | `yourpassword` | 访问密码，多个密码用英文逗号分隔，留空则不验证 |
-| `HF_TOKEN` | `hf_xxx...` | HuggingFace API Token，不填则隐藏 HF 模型 |
-| `ENHANCE` | `false` | 设为 `false` 全局禁用提示词增强，默认开启 |
-| `IMAGE_HOST` | `https://your-image-host.com` | 图床地址，末尾不要加 `/` |
-| `GALLERY_URL` | `https://your-gallery.workers.dev` | Gallery Worker 地址，末尾不要加 `/` |
-
-> `IMAGE_HOST` 和 `GALLERY_URL` 二者同时配置时，图片生成后会先发给 Gallery Worker 做 AI 分析并上传图床；只配置 `IMAGE_HOST` 时仅上传图床不入图库。
-
-### 4. 部署代码
-
-将 `worker-single.js` 的全部内容粘贴到 Worker 编辑器中，点击 **Save and Deploy**。
+基于 Cloudflare Workers 的 AI 文生图工具，聚合 Cloudflare AI、Pollinations、HuggingFace 三大服务商共 17 个模型，支持文生图、图生图、提示词增强，并可自动同步到图库。
 
 ---
 
-## 支持的模型
+## 功能一览
 
-### Cloudflare Workers AI（需 AI 绑定）
+- **多服务商聚合**：Cloudflare AI / Pollinations / HuggingFace 一键切换
+- **自动 Fallback**：主模型失败时自动切换备用模型，确保出图成功率
+- **提示词增强**：AI 自动优化中英文提示词，提升图片质量
+- **图生图（图转图）**：上传参考图，按描述或风格生成新图
+- **图库联动**：生成完自动推送到 Gallery Worker，无缝存档
+- **图床直传**：图片直接上传至图床，生成持久稳定的直链
+- **深色模式**：跟随系统自动切换，也可手动切换
+- **移动端适配**：响应式布局，手机可用
 
-| 模型 ID | 名称 | 说明 |
+---
+
+## 部署步骤
+
+### 1. 部署 Worker
+
+在 Cloudflare 控制台进入 **Workers & Pages → Create → Worker**，将 `text2img-worker.js` 的内容完整粘贴，保存并部署。
+
+### 2. 配置环境变量
+
+在 Worker 的 **Settings → Variables → Environment Variables** 中按需添加：
+
+| 变量名 | 必填 | 说明 |
+|--------|------|------|
+| `PASSWORD` | 否 | 访问密码，多个密码用英文逗号分隔，留空则无需密码 |
+| `IMAGE_HOST` | 否 | 图床地址，如 `https://image.kont.us.ci`，设置后图片自动上传图床 |
+| `GALLERY_URL` | 否 | 图库地址，如 `https://gallery.kont.us.ci`，设置后图片自动入库 |
+| `HF_TOKEN` | 否 | HuggingFace API Token，不填则 HF 模型不显示 |
+| `ENHANCE` | 否 | 设为 `false` 可全局关闭提示词增强功能 |
+
+> `IMAGE_HOST` 和 `GALLERY_URL` 同时设置时，图片由 Gallery Worker 负责转存到图床；只设置 `IMAGE_HOST` 时，由本 Worker 直接上传。
+
+### 3. 替换侧边栏链接（可选）
+
+侧边栏底部有图库和图床的快捷入口，在代码中搜索并替换以下占位符：
+
+| 占位符 | 替换为 |
+|--------|--------|
+| `YOUR_GALLERY_URL` | 你的图库地址，如 `https://gallery.kont.us.ci` |
+| `YOUR_IMAGE_HOST_URL` | 你的图床地址，如 `https://image.kont.us.ci` |
+
+---
+
+## 模型列表
+
+### Cloudflare AI（6 个）
+
+| 模型 ID | 名称 | 特点 |
 |---------|------|------|
 | `cf-flux-dev` | FLUX.1-dev FP8 | 旗舰质量，细节极佳 |
 | `cf-flux-schnell` | FLUX.1 Schnell | 极速生成，质量均衡 |
 | `cf-sdxl` | Stable Diffusion XL | SDXL 高质量通用 |
 | `cf-sdxl-lightning` | SDXL Lightning | 极速 SDXL 版本 |
 | `cf-dreamshaper` | DreamShaper 8 LCM | 增强真实感微调模型 |
+| `cf-sd15-img2img` | SD 1.5 图生图 | **仅图生图**，最稳定 |
 
-### Pollinations AI（免费，无需 Key）
+### Pollinations（8 个，免费无需 Token）
 
-| 模型 ID | 名称 | 说明 |
+| 模型 ID | 名称 | 特点 |
 |---------|------|------|
-| `pol-flux` | FLUX | 高质量 |
-| `pol-flux-realism` | FLUX Realism | 超写实 |
-| `pol-turbo` | Turbo | 极速 |
-| `pol-flux-anime` | FLUX Anime | 动漫风格 |
-| `pol-flux-3d` | FLUX 3D | 3D 渲染风格 |
+| `pol-flux` | FLUX | 高质量旗舰 |
+| `pol-flux-realism` | FLUX Realism | 超写实人像 |
+| `pol-flux-anime` | FLUX Anime | 动漫插画风 |
+| `pol-flux-3d` | FLUX 3D | 3D 渲染质感 |
+| `pol-turbo` | SDXL Turbo | 极速生成 |
+| `pol-any-dark` | Any Dark | 暗黑艺术风格 |
+| `pol-konyconi` | Kony Coni | 二次元插画 |
+| `pol-flux-cablyai` | FLUX CablyAI | 写实增强版 |
 
-### HuggingFace Inference（需配置 `HF_TOKEN`）
+### HuggingFace（3 个，需 HF_TOKEN）
 
-| 模型 ID | 名称 | 说明 |
+| 模型 ID | 名称 | 特点 |
 |---------|------|------|
 | `hf-flux-dev` | FLUX.1-dev | 开源旗舰 |
 | `hf-flux-schnell` | FLUX.1-schnell | 极速 FLUX |
-| `hf-sdxl` | SDXL | Stability AI 官方 |
+| `hf-sdxl` | SDXL | Stability AI 原版 |
 
 ---
 
-## 功能说明
+## 自动 Fallback 机制
 
-### 提示词增强
-
-使用 `@cf/meta/llama-3.1-8b-instruct` 对输入提示词进行扩写和优化：
-
-- 自动检测中文并翻译为英文
-- 补充光照、构图、风格、氛围等细节
-- 生成后页面会同时显示原始和增强后的提示词
-- 可在页面右上角开关随时切换，也可通过 `ENHANCE=false` 环境变量全局禁用
-
-### 快速尺寸模板
-
-页面提供 8 种常用尺寸一键切换：
-
-| 模板 | 尺寸 |
-|------|------|
-| 正方形 | 1024 × 1024 |
-| 横屏 16:9 | 1920 × 1080 |
-| 竖屏 9:16 | 1080 × 1920 |
-| 封面图 | 1200 × 630 |
-| Instagram | 1080 × 1080 |
-| Twitter 封面 | 1500 × 500 |
-| 壁纸 2K | 2560 × 1440 |
-| 极速小图 | 512 × 512 |
-
-### 高级选项
-
-折叠面板中可手动调整：
-- 宽度 / 高度滑块
-- 推理步数（Steps）
-- 引导系数（Guidance Scale）
-- 随机种子（Seed）
-
-### 自动上传图床
-
-配置 `IMAGE_HOST` 后，每次生成成功图片会自动上传到图床，页面下方出现图床直链栏，支持一键复制和跳转。
-
-### 自动入图库
-
-同时配置 `IMAGE_HOST` 和 `GALLERY_URL` 后，完整流程：
+当所选模型生成失败时，Worker 会按以下顺序自动尝试备用模型，直到出图成功：
 
 ```
-生成图片 → 发给 Gallery Worker → AI 视觉分析打标签 → 上传图床 → 存入 KV 图库 → 返回直链给前端
+pol-flux → pol-flux-realism → pol-turbo → pol-any-dark
+    → pol-flux-anime → pol-flux-3d → pol-konyconi → pol-flux-cablyai
 ```
 
-### 历史记录
-
-- 每次生成自动保存到本地（IndexedDB）
-- 侧边栏「历史记录」可查看所有记录
-- 点击历史条目可一键复用提示词和参数重新生成
-- 支持单条删除或清空全部
-
-### 超时重试
-
-每次请求超时限制 55 秒，失败后自动重试 1 次，重试间隔 1 秒。
+Fallback 期间页面显示「正在使用备用模型」提示，最终显示实际使用的模型名称。
 
 ---
 
-## API 接口
+## 图生图使用说明
+
+点击侧边栏「图生图」标签切换模式：
+
+1. 拖拽或点击上传参考图（支持 JPG / PNG / WebP）
+2. 填写提示词，描述想要的风格或内容变化（留空则保持原图风格）
+3. 调整参数：
+   - **变换强度**：0.1（几乎不变）→ 1.0（完全重绘），建议 0.6–0.8
+   - **迭代步数**：步数越高质量越好，但耗时更长，建议 20
+   - **引导系数**：越高越遵从提示词，建议 7–10
+4. 可用模型：Cloudflare SDXL 系列 + SD 1.5 图生图（推荐）
+
+---
+
+## 提示词增强
+
+开启后，输入中文或简短英文提示词时，AI 会自动扩写为更详细的英文提示词再送入模型，通常能明显提升画面质量。
+
+- 在侧边栏「提示词增强」开关控制
+- 环境变量 `ENHANCE=false` 可全局强制关闭
+- 增强后的完整提示词会在生成结果下方展示
+
+---
+
+## 与图库 / 图床联动
+
+设置 `GALLERY_URL` 后，每次文生图完成时：
+
+```
+生成图片（base64）
+    ↓
+POST {GALLERY_URL}/gallery/ingest（含图片文件 + 提示词 + 参数）
+    ↓
+Gallery Worker 上传图床 + AI 打标签 + 写入 KV
+```
+
+之后可在图库页面直接浏览、搜索所有生成过的图片。
+
+---
+
+## API 说明
+
+所有接口通过 POST 请求调用，均需在请求头中携带 `X-Password: 你的密码`（未设置 `PASSWORD` 时无需鉴权）。
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
-| `GET` | `/` | 返回前端页面 |
-| `GET` | `/api/models` | 返回当前可用模型列表 |
-| `GET` | `/api/prompts` | 返回随机提示词列表 |
-| `POST` | `/` | 生成图片 |
+| `GET` | `/` | 返回主界面 |
+| `POST` | `/generate` | 文生图，参数见下方 |
+| `POST` | `/img2img` | 图生图，参数见下方 |
+| `GET` | `/models` | 返回当前可用的模型列表 |
 
-### POST `/` 请求体（JSON）
+**`/generate` 请求体（JSON）：**
 
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| `password` | string | 访问密码（若已配置） |
-| `prompt` | string | 提示词（必填） |
-| `model` | string | 模型 ID（必填） |
-| `enhance` | boolean | 是否开启提示词增强 |
-| `width` | number | 图片宽度，默认 1024 |
-| `height` | number | 图片高度，默认 1024 |
-| `num_steps` | number | 推理步数 |
-| `guidance` | number | 引导系数 |
-| `seed` | number | 随机种子 |
+```json
+{
+  "prompt": "a futuristic city at sunset",
+  "negativePrompt": "",
+  "model": "pol-flux",
+  "width": 1024,
+  "height": 1024,
+  "steps": 20,
+  "guidance": 7.5,
+  "seed": -1,
+  "enhance": true
+}
+```
 
-### POST `/` 响应
+**`/img2img` 请求体（multipart/form-data）：**
 
-- Content-Type：`image/png` 或 `image/jpeg`
-- 响应头 `x-image-url`：图床直链（配置图床后返回）
-- 响应头 `x-enhanced`：增强后的提示词文本
+| 字段 | 说明 |
+|------|------|
+| `image` | 参考图文件 |
+| `prompt` | 提示词 |
+| `negativePrompt` | 负向提示词 |
+| `model` | 模型 ID |
+| `strength` | 变换强度 0.1–1.0 |
+| `steps` | 迭代步数 |
+| `guidance` | 引导系数 |
 
 ---
 
-## 快捷链接
+## 相关项目
 
-页面侧边栏「工具」区提供跳转：
-- **AI 图库** → `https://your-gallery.workers.dev`
-- **图床** → `https://your-image-host.com`
+- [Gallery Worker](https://gallery.kont.us.ci) — 配套 AI 图库，自动存档所有生成图片
+- [Telegraph Image 图床](https://image.kont.us.ci) — 图片文件实际存储
